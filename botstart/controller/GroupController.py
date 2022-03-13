@@ -26,11 +26,11 @@ def groupController(data):
 
 
     if message == '测试':
-        print(GroupEntity.get_group_at_all_remain(group_id))
+        # print(GroupEntity.get_group_at_all_remain(group_id))
         pass
         # print(guildImpl.get_group_info(group_id, "战甲"))
         # print(GroupEntity.get_group_info(group_id))
-        # GroupEntity.send_group_msg(group_id, '[CQ:at,qq=' + user_id + ']' + message)
+        # GroupEntity.send_group_msg(group_id, '[CQ:embed,data={embed: {title: "标题"&#44;prompt: "消息通知"&#44;thumbnail: {url: "xxxxx.png"&#44;}&#44;fields: &#91;{name: "当前等级：黄金"&#44;}&#44;{name: "之前等级：白银"&#44;}&#44;{name: "😁继续努力"&#44;}&#44;&#93;&#44;}&#44;}')
     elif message[:3] == '转语音':
         GroupEntity.send_group_msg(group_id, CQcode.tts(message[3:]))
     elif message == '鬼故事':

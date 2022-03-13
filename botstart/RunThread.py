@@ -93,7 +93,7 @@ class runhire(threading.Thread):  # 继承父类threading.Thread
             hireImpl.die()
 
 
-class runsky(threading.Thread):  # 继承父类threading.Thread
+class runsky(threading.Thread):
     def __init__(self, ):
         threading.Thread.__init__(self)
 

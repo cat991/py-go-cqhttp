@@ -60,7 +60,7 @@ def task(specified):
 def die():
     while (True):
         time.sleep(60)
-        if time.strftime("%H:%M", time.localtime()) == '00:05':
+        if time.strftime("%H:%M", time.localtime()) == '00:03':
             get_weibo(uid,'每日任务')
             get_weibo(uid,'本周复刻')
 # 手动刷新数据

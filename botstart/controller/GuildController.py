@@ -1,5 +1,5 @@
-from gocqhttpbot.botstart.entity import GuildEntity, CQcode
-from gocqhttpbot.botstart.impl import yuleImpl, wfImpl,hireImpl,guildImpl,blind_box,gatherImpl,skyImpl
+from gocqhttpbot.botstart.entity import GuildEntity, CQcode,xmlEntity
+from gocqhttpbot.botstart.impl import yuleImpl, wfImpl,hireImpl,guildImpl,blind_box,skyImpl
 from gocqhttpbot.botstart.util import SignUtil, wordUtil,memeImgGenerate,permissions
 import json, re,time,os,sys
 
@@ -13,18 +13,12 @@ def guildController(data):
     at_user = f'[CQ:at,qq={user_id}] '
     nickname = data['sender']['nickname']
 
-
     pass_path = '默认指令'
     # 获取指令路径并输出
     for i in pass_list('配置内容'):
         if guild_id == i['instruction']:
-            pass_path =i['content']
+            pass_path = i['content']
             break
-
-
-    for j in pass_list(pass_path):
-        if message == j['instruction']:
-            GuildEntity.send_guild_channel_msg(guild_id,channel_id,at_user + j['content'])
 
     if (message == '屏蔽' or message == '关闭') and (user_id == '144115218676755577' or user_id == str(
             json.loads(GuildEntity.get_guild_meta_by_guest(guild_id))['data']['owner_id'])):
@@ -52,14 +46,16 @@ def guildController(data):
     if wordUtil.queryAllPermiss(guild_id, channel_id):
         return ''
 
-    if message == '测个屁的福':
+
+    for j in pass_list(pass_path):
+        if message == j['instruction']:
+            GuildEntity.send_guild_channel_msg(guild_id, channel_id, at_user + j['content'])
+
+    if message == '测试':
+
+        # GuildEntity.send_guild_channel_msg(guild_id,channel_id,f'[CQ:json,data={xmlEntity.getEmbed()}]')
         pass
-        # gatherImpl.getGatHer(guild_id,channel_id,user_id)
-        # hireImpl.hire(json.dumps(data))
-        # at_qq = re.findall('\[CQ:at,qq=(.*?)\] ', message)
-        # guildentity.send_guild_channel_msg(guild_id, channel_id, at_user + message[2:] + str(at_qq[0]))
-        # guildentity.send_guild_channel_msg(guild_id, channel_id, at_user +CQcode.images('images/测试') +message[2:])
-        # guildentity.send_guild_channel_msg(guild_id, channel_id, at_user + message[2:]+CQcode.images('images/测试') )
+
     elif message[:3] == '转语音':
         # guildentity.send_guild_channel_msg(guild_id,channel_id,CQcode.tts(message[3:]))
         GuildEntity.send_guild_channel_msg(guild_id, channel_id, '仅支持qq群')
