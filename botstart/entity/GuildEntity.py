@@ -1,5 +1,7 @@
 import requests
 
+from gocqhttpbot.botstart.util import permissions
+
 configs = {
     'url': "http://127.0.0.1:5700",
     'textcont': 0
@@ -14,8 +16,8 @@ def send_guild_channel_msg(guild_id, channel_id, message):
         "channel_id": channel_id,
         "message": message
     }
-    requests.post(url, data)
-
+    print(requests.post(url, data).text)
+    # permissions.add_msg_id(requests.post(url, data).text)
 
 # 获取频道元数据
 def get_guild_meta_by_guest(guild_id):

@@ -1,4 +1,6 @@
-from gocqhttpbot.botstart.entity import GuildEntity, CQcode
+import re
+
+from gocqhttpbot.botstart.entity import GuildEntity, CQcode,GroupEntity
 from gocqhttpbot.botstart.util import textToImg, SignUtil
 import json, time, os, sys, random
 
@@ -51,33 +53,62 @@ def monitoring():
     listFile = os.listdir(botpath)
     times = time.time()
     for guil_id in listFile:
-        file = botpath + f'\\{guil_id}'
-        with open(file, 'r', encoding='utf-8') as f:
-            fls = json.loads(f.read())
-            f.close()
-            for flist in fls:
-                if flist['hireTime'] <= times:
-                    for typeof in hireTypes:
-                        if flist['hireType'] == typeof['name']:
-                            at_user = f'[CQ:at,qq={str(flist["user_id"])}] '
-                            at_her = f'[CQ:at,qq={flist["hire"]}] '
-                            judge = random.randint(0, 2)
-                            if judge == 1 or judge == 2:
-                                deletHire(guil_id.replace('.json', ''), flist['hire'])
-                                SignUtil.updataradish(guil_id.replace('.json', ''), int(typeof['obtain']), flist['user_id'], 0, 0, 0)
-                                return GuildEntity.send_guild_channel_msg(guil_id.replace('.json', ''),
-                                                                          flist['channel_id'],
-                                                                          at_user + at_her + typeof['success'] + CQcode.images(
-                                                                              f'images/雇佣/success{typeof["name"]}.jpg'))
-                            elif judge == 0:
+        if len(guil_id) > 15:
+            file = botpath + f'\\{guil_id}'
+            with open(file, 'r', encoding='utf-8') as f:
+                fls = json.loads(f.read())
+                f.close()
+                for flist in fls:
+                    if flist['hireTime'] <= times:
+                        for typeof in hireTypes:
+                            if flist['hireType'] == typeof['name']:
+                                at_user = f'[CQ:at,qq={str(flist["user_id"])}] '
+                                at_her = f'[CQ:at,qq={flist["hire"]}] '
+                                judge = random.randint(0, 2)
+                                if judge == 1 or judge == 2:
+                                    deletHire(guil_id.replace('.json', ''), flist['hire'])
+                                    SignUtil.updataradish(guil_id.replace('.json', ''), int(typeof['obtain']), flist['user_id'], 0, 0, 0)
+                                    return GuildEntity.send_guild_channel_msg(guil_id.replace('.json', ''),
+                                                                              flist['channel_id'],
+                                                                              at_user + at_her + typeof['success'] + CQcode.images(
+                                                                                  f'images/雇佣/success{typeof["name"]}.jpg'))
+                                elif judge == 0:
 
-                                deletHire(guil_id.replace('.json', ''), flist['hire'])
-                                SignUtil.updataradish(guil_id.replace('.json', ''), -int(typeof['pay']), flist['user_id'], 0, 0, 0)
-                                return GuildEntity.send_guild_channel_msg(guil_id.replace('.json', ''),
-                                                                          flist['channel_id'],
-                                                                          at_user + at_her + typeof['lose'] + CQcode.images(
-                                                                              f'images/雇佣/lose{typeof["name"]}.jpg'))
+                                    deletHire(guil_id.replace('.json', ''), flist['hire'])
+                                    SignUtil.updataradish(guil_id.replace('.json', ''), -int(typeof['pay']), flist['user_id'], 0, 0, 0)
+                                    return GuildEntity.send_guild_channel_msg(guil_id.replace('.json', ''),
+                                                                              flist['channel_id'],
+                                                                              at_user + at_her + typeof['lose'] + CQcode.images(
+                                                                                  f'images/雇佣/lose{typeof["name"]}.jpg'))
+        else:
+            file = botpath + f'\\{guil_id}'
+            with open(file, 'r', encoding='utf-8') as f:
+                fls = json.loads(f.read())
+                f.close()
+                for flist in fls:
+                    if flist['hireTime'] <= times:
+                        for typeof in hireTypes:
+                            if flist['hireType'] == typeof['name']:
+                                at_user = f'[CQ:at,qq={str(flist["user_id"])}] '
+                                at_her = f'[CQ:at,qq={flist["hire"]}] '
+                                judge = random.randint(0, 2)
+                                if judge == 1 or judge == 2:
+                                    deletHire(guil_id.replace('.json', ''), flist['hire'])
+                                    SignUtil.updataradish(guil_id.replace('.json', ''), int(typeof['obtain']),
+                                                          flist['user_id'], 0, 0, 0)
+                                    return GroupEntity.send_group_msg(guil_id.replace('.json', ''),
+                                                                              at_user + at_her + typeof[
+                                                                                  'success'] + CQcode.images(
+                                                                                  f'images/雇佣/success{typeof["name"]}.jpg'))
+                                elif judge == 0:
 
+                                    deletHire(guil_id.replace('.json', ''), flist['hire'])
+                                    SignUtil.updataradish(guil_id.replace('.json', ''), -int(typeof['pay']),
+                                                          flist['user_id'], 0, 0, 0)
+                                    return GroupEntity.send_group_msg(guil_id.replace('.json', ''),
+                                                                              at_user + at_her + typeof[
+                                                                                  'lose'] + CQcode.images(
+                                                                                  f'images/雇佣/lose{typeof["name"]}.jpg'))
 
 # 结算删除信息
 def deletHire(guild_id, hire):
@@ -159,6 +190,70 @@ def addHire(guild_id, channel_id, user_id, at_qq, hireType):
         GuildEntity.send_guild_channel_msg(guild_id, channel_id, at_user + '没有该类型的任务~')
 
 
+
+# 添加雇佣信息 q群适配
+def addHire_group(group_id, user_id, at_qq, hireType):
+    if SignUtil.judge(group_id, user_id) :
+        return GroupEntity.send_group_msg(group_id, f'[CQ:at,qq={at_qq}] ' + '数据库中没有你的数据，请先签到，发送：签到')
+    at_user = f'[CQ:at,qq={str(user_id)}] '
+    cont = 0
+    conts = 0
+    flag = True
+    if user_id == at_qq:
+        return GroupEntity.send_group_msg(group_id, at_user + '无法雇佣自己')
+
+    for typeof in hireTypes:
+        conts += 1
+        if typeof['name'] == hireType:
+            flag = False
+            bypath = os.path.dirname(os.path.realpath(sys.argv[0])) + f'\\频道数据\\雇佣数据\\{str(group_id)}.json'
+            try:
+                with open(bypath, 'r', encoding='utf-8') as f:
+                    data = json.loads(f.read())
+                    f.close()
+                    for datalist in data:
+                        if datalist['hire'] == at_qq:
+                            return GroupEntity.send_group_msg(group_id, at_user + '对方已被雇佣')
+                        if datalist['user_id'] == user_id:
+                            cont += 1
+                    if cont >= 2:
+                        return GroupEntity.send_group_msg(group_id, at_user + '最多只能雇佣两个人哦~')
+                    else:
+                        word = {
+                            'user_id': str(user_id),  # 主人id
+                            'hire': str(at_qq),  # 被雇佣人id
+                            'hireTime': time.time() + int(typeof['time']),  # 被雇佣的时间
+                            'hireType': typeof['name']  # 雇佣类型
+                        }
+                        # #将新传入的dict对象追加至list中
+                        data.append(word)
+                        # #将追加的内容与原有内容写回（覆盖）原文件
+                        with open(bypath, 'w', encoding='utf-8') as f2:
+                            json.dump(data, f2, ensure_ascii=False)
+                            f2.close()
+                        return GroupEntity.send_group_msg(group_id,
+                                                                  at_user + typeof['nickname'] + CQcode.images(
+                                                                      f'images/雇佣/{typeof["name"]}.jpg'))
+            except:
+                data = [{
+                    'user_id': str(user_id),  # 主人id
+                    'hire': str(at_qq),  # 被雇佣人id
+                    'hireTime': time.time() + int(typeof['time']),  # 被雇佣的时间
+                    'hireType': typeof['name']  # 雇佣类型
+                }]
+                with open(bypath, 'w', encoding='utf-8') as f2:
+                    json.dump(data, f2, ensure_ascii=False)
+                    f2.close()
+                return GroupEntity.send_group_msg(group_id,
+                                                          at_user + typeof['nickname'] + CQcode.images(
+                                                              f'images/雇佣/{typeof["name"]}.jpg'))
+
+    if flag:
+        GroupEntity.send_group_msg(group_id, at_user + '没有该类型的任务~')
+
+
+
+
 # 死循环监控
 def die():
     while (True):
@@ -201,8 +296,22 @@ def userHire(guild_id, channel_id, user_id):
 
     return GuildEntity.send_guild_channel_msg(guild_id, channel_id, at_user + hire_content)
 
+def userHire_group(group_id, user_id):
+    bypath = os.path.dirname(os.path.realpath(sys.argv[0])) + f'\\频道数据\\雇佣数据\\{group_id}.json'
+    at_user = f'[CQ:at,qq={user_id}]'
+    hire_content = '你的雇佣信息如下:\n'
+    with open(bypath, 'r', encoding='utf-8') as f:
+        item_list = json.loads(f.read())
+        f.close()
+        for i in item_list:
+            if i['user_id'] == user_id:
+                shijian = time.strftime("%M:%S", time.localtime(int(i["hireTime"]) - int(time.time())))
+                hire_content = hire_content + f'[CQ:at,qq={str(i["hire"])}] 被雇佣去:{i["hireType"]}\n还差{shijian}分钟自动结算\n \n'
+
+    return GroupEntity.send_group_msg(group_id, at_user + hire_content)
+
 # 雇佣功能
-def hire(data):
+def hire_guild(data):
     data = json.loads(data)
     message = data['message']  # 消息
     guild_id = data['guild_id']  # 频道id
@@ -213,9 +322,24 @@ def hire(data):
         functionss(guild_id, channel_id, user_id, at_user, message)
     elif message[:2] == '雇佣':
         hireType = message[message.index(']'):].replace(']', '').replace(' ', '')
-        at_qq = message[message.index('qq='):message.index(']')].replace('qq=', '')
+        # at_qq = message[message.index('qq='):message.index(']')].replace('qq=', '')
+        at_qq = re.findall('[0-9]+', message)[0]
         addHire(guild_id, channel_id, user_id, at_qq, hireType)
     elif message == '我的雇佣':
         userHire(guild_id, channel_id, user_id)
 
 
+def hire_group(data):
+    data = json.loads(data)
+    self_id = str(data['self_id'])  # 框架qq号
+    group_id = str(data['group_id'])  # 群号
+    message = data['message']  # 消息内容
+    user_id = str(data['user_id'])  # 触发用户id
+    at_id = f'[CQ:at,qq={user_id}]'
+    if message[:2] == '雇佣':
+        hireType = message[message.index(']'):].replace(']', '').replace(' ', '')
+        # at_qq = message[message.index('qq='):message.index(']')].replace('qq=', '')
+        at_qq = re.findall('[0-9]+',message)[0]
+        addHire_group(group_id, user_id, at_qq, hireType)
+    elif message == '我的雇佣':
+        userHire_group(group_id, user_id)

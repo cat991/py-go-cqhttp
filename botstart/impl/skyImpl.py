@@ -21,7 +21,7 @@ def task(specified):
 
             resp = json.loads(f.read())
             f.close()
-            print(resp)
+            # print(resp)
         content = re.findall('</span></a>(.*?)<a href=', resp['data']['text'])[0]
         content = content.replace('<br />', '\n')
         if '<a' in content:
@@ -42,7 +42,7 @@ def task(specified):
         cont = 0
         # 图片内容
         getImgs = resp['data']['pics']
-        print(getImgs)
+        # print(getImgs)
         for i in getImgs:
             if cont < 3 :
                 imagesCQ += CQcode.images(i['large']['url'])
@@ -62,11 +62,11 @@ def die():
         time.sleep(60)
         if time.strftime("%H:%M", time.localtime()) == '00:03':
             get_weibo(uid,'每日任务')
-            get_weibo(uid,'本周复刻')
+            get_weibo(uid,'P1预估兑换树')
 # 手动刷新数据
 def shoudong():
     get_weibo(uid,'每日任务')
-    get_weibo(uid,'本周复刻')
+    get_weibo(uid,'P1预估兑换树')
     return '数据刷新成功'
 
 #定义页面打开函数

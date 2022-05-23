@@ -1,8 +1,7 @@
 import os, json, sys, random, datetime, re
 from time import localtime, strftime, time
-from gocqhttpbot.botstart.entity import CQcode, GuildEntity
-from gocqhttpbot.botstart.util import permissions
-from gocqhttpbot.botstart.impl import gatherImpl
+from gocqhttpbot.botstart.entity import CQcode, GuildEntity,GroupEntity
+from gocqhttpbot.botstart.util import permissions,init
 
 # 添加用户
 word = {}
@@ -24,25 +23,24 @@ textsuccess = ['🍒打劫成功：你顺利得手并且亲了对方一口获得
 
 
 # 签到功能
-def addUser(guil_id, channel_id, user_id, name):
-    ran = random.randint(25, 40)
+def addUser(guil_id, user_id):
+    ran = random.randint(init.CONFIG.min, init.CONFIG.max)
     day = strftime("%d日", localtime())
     word = {
         'user_id': user_id,
         'radish': ran,
-        'name': name,
         'day': day,
-        'rob': 5,
-        'unrob': 2,
+        'rob': init.CONFIG.rob,
+        'unrob': init.CONFIG.unrob,
         'pullradish': 0,
-        'give': 15,
+        'give': init.CONFIG.give,
         'planting': None  # 种植萝卜
     }
     try:
-        obj = write_json(guil_id, channel_id, word)
+        obj = write_json(guil_id, word)
     except:
         user_ById(guil_id, user_id)
-        obj = write_json(guil_id, channel_id, word)
+        obj = write_json(guil_id, word)
         return obj
     return obj
 
@@ -88,14 +86,13 @@ def user_ById(guil_id, user_id):
             f.close()
     except:
         word = [{
-            'user_id': '144115218676755577',  # 用户id
-            'radish': random.randint(15, 25),  # 萝卜数量
-            'name': '黑猫大帅比',  # 用户昵称
+            'user_id': str(user_id),  # 用户id
+            'radish': random.randint(init.CONFIG.min, init.CONFIG.max),  # 萝卜数量
             'day': day,  # 日期
-            'rob': 5,  # 打劫次数
-            'unrob': 2,  # 被打劫次数
+            'rob': init.CONFIG.rob,  # 打劫次数
+            'unrob': init.CONFIG.unrob,  # 被打劫次数
             'pullradish': 0,  # 拔萝卜 0和1
-            'give': 15,  # 可赠送萝卜数量
+            'give': init.CONFIG.give,  # 可赠送萝卜数量
             'planting': None  # 种植萝卜
         }]
         with open(botpath, 'w', encoding='utf-8') as f2:
@@ -111,7 +108,7 @@ def user_ById(guil_id, user_id):
                     planting = f'🍒种植:您的萝卜已成熟 {i["planting"] <= time()}'
                 else:
                     shijian = strftime("%M:%S", localtime(int(i["planting"]) - int(time())))
-                    print(localtime(int(i["planting"]) - int(time())))
+                    # print(localtime(int(i["planting"]) - int(time())))
                     planting = f'🍒种植:{shijian}后可收获'
             return f'\n兔宝您的菜篮子🥘：\n🍒萝卜数量：萝卜🥕·{i["radish"]}\n' \
                    f'🍒打劫次数：{i["rob"]}\n🍒被打劫次数：{i["unrob"]}\n' \
@@ -168,7 +165,7 @@ def delete_json(guil_id, at_id):
 
 
 # 输出和写入json数据到文件
-def write_json(guild_id, channel_id, obj):
+def write_json(guild_id, obj):
     # 首先读取已有的json文件中的内容
     ym = strftime("%Y年%m月", localtime())
     day = strftime("%d日", localtime())
@@ -182,11 +179,10 @@ def write_json(guild_id, channel_id, obj):
                 if i['day'] == obj['day']:
                     return '🍒兔宝·今日签过到了哦！吃根糖葫芦明天再来吧🍡'
                 item_list[cont]['day'] = obj['day']
-                item_list[cont]['name'] = obj['name']
                 item_list[cont]['radish'] += int(obj['radish'])
-                item_list[cont]['rob'] = 5
-                item_list[cont]['unrob'] = 2
-                item_list[cont]['give'] = 15
+                item_list[cont]['rob'] = init.CONFIG.rob
+                item_list[cont]['unrob'] = init.CONFIG.unrob
+                item_list[cont]['give'] = init.CONFIG.give
                 with open(botpath, 'w', encoding='utf-8') as f2:
                     json.dump(item_list, f2, ensure_ascii=False)
                     f2.close()
@@ -307,6 +303,7 @@ def seed(guil_id, user_id):
 def updataradish(guil_id, radish, user_id, rob, unrob, give, atuser_id=""):
     ym = strftime("%Y年%m月", localtime())
     botpath = os.path.dirname(os.path.realpath(sys.argv[0])) + f'\\频道数据\\{ym + guil_id}.json'
+
     cont = 0
     with open(botpath, 'r', encoding='utf-8') as f:
         item_list = json.loads(f.read())
@@ -362,7 +359,7 @@ def give(guil_id, user_id, at_id, number):
         return f'[CQ:at,qq={user_id}]你已经不能送再多了'
 
 
-def sig_index(datas):
+def sig_index_guild(datas):
     datas = json.loads(datas)
     message = datas['message']  # 消息
     guild_id = datas['guild_id']  # 频道id
@@ -375,21 +372,59 @@ def sig_index(datas):
     elif message == '拔萝卜':
         GuildEntity.send_guild_channel_msg(guild_id, channel_id, at_user +
                                            pull(guild_id, user_id))
-    elif message[:4] == '扣除萝卜' and (user_id == '144115218676755577' or permissions.getPermissions(user_id)):
-        at_qq = message[message.index('qq='):message.index(']')].replace('qq=', '')
-        numbers = ''
-        number = re.findall(f'[0-9]', message[message.index(']'):])
-        for i in number:
-            numbers = numbers + str(i)
+    elif message[:4] == '扣除萝卜' and (user_id == str(init.CONFIG.masterId) or permissions.getPermissions(user_id)):
+        # at_qq = message[message.index('qq='):message.index(']')].replace('qq=', '')
+        # numbers = ''
+        # number = re.findall(f'[0-9]', message[message.index(']'):])
+        # for i in number:
+        #     numbers = numbers + str(i)
+
+        at_qq = re.findall(f'[0-9]+', message)[0]
+        numbers = re.findall(f'[0-9]+', message)[1]
         updataradish(guild_id, -int(numbers), at_qq, 0, 0, 0)
         GuildEntity.send_guild_channel_msg(guild_id, channel_id, at_user +
                                            f'成功扣除{numbers}根萝卜')
-    elif message[:4] == '增加萝卜' and (user_id == '144115218676755577' or permissions.getPermissions(user_id)):
-        at_qq = message[message.index('qq='):message.index(']')].replace('qq=', '')
-        numbers = ''
-        number = re.findall(f'[0-9]', message[message.index(']'):])
-        for i in number:
-            numbers = numbers + str(i)
+    elif message[:4] == '增加萝卜' and (user_id == str(init.CONFIG.masterId) or permissions.getPermissions(user_id)):
+        # at_qq = message[message.index('qq='):message.index(']')].replace('qq=', '')
+        at_qq = re.findall(f'[0-9]+', message)[0]
+        # numbers = ''
+        # number = re.findall(f'[0-9]', message[message.index(']'):])
+        # for i in number:
+        #     numbers = numbers + str(i)
+        numbers = re.findall(f'[0-9]+', message)[1]
         updataradish(guild_id, int(numbers), at_qq, 0, 0, 0)
         GuildEntity.send_guild_channel_msg(guild_id, channel_id, at_user +
+                                           f'成功添加{numbers}根萝卜')
+def sig_index_group(datas):
+    data = json.loads(datas)
+    group_id = str(data['group_id'])  # 群号
+    message = data['message']  # 消息内容
+    user_id = str(data['user_id'])  # 触发用户id
+    at_id = f'[CQ:at,qq={user_id}]'
+    if message == '种萝卜':
+        GroupEntity.send_group_msg(group_id,at_id+seed(group_id, user_id))
+    elif message == '拔萝卜':
+        GroupEntity.send_group_msg(group_id, at_id +
+                                           pull(group_id, user_id))
+    elif message[:4] == '扣除萝卜' and (user_id == str(init.CONFIG.masterId) or permissions.getPermissions(user_id)):
+        # at_qq = message[message.index('qq='):message.index(']')].replace('qq=', '')
+        # numbers = ''
+        # number = re.findall(f'[0-9]', message[message.index(']'):])
+        at_qq = re.findall(f'[0-9]+', message)[0]
+        number = re.findall(f'[0-9]+', message)[1]
+        # for i in number:
+        #     numbers = numbers + str(i)
+        updataradish(group_id, -int(number), at_qq, 0, 0, 0)
+        GroupEntity.send_group_msg(group_id, at_id +
+                                           f'成功扣除{number}根萝卜')
+    elif message[:4] == '增加萝卜' and (user_id == str(init.CONFIG.master) or permissions.getPermissions(user_id)):
+        # at_qq = message[message.index('qq='):message.index(']')].replace('qq=', '')
+        # numbers = ''
+        # number = re.findall(f'[0-9]', message[message.index(']'):])
+        # for i in number:
+        #     numbers = numbers + str(i)
+        at_qq = re.findall(f'[0-9]+', message)[0]
+        numbers = re.findall(f'[0-9]+',message)[1]
+        updataradish(group_id, int(numbers), at_qq, 0, 0, 0)
+        GroupEntity.send_group_msg(group_id, at_id +
                                            f'成功添加{numbers}根萝卜')

@@ -1,7 +1,7 @@
 from gocqhttpbot.botstart.entity import GuildEntity, CQcode,xmlEntity
-from gocqhttpbot.botstart.impl import yuleImpl, wfImpl,hireImpl,guildImpl,blind_box,skyImpl
-from gocqhttpbot.botstart.util import SignUtil, wordUtil,memeImgGenerate,permissions
-import json, re,time,os,sys
+from gocqhttpbot.botstart.impl import yuleImpl, wfImpl,hireImpl,guildImpl,blind_box,skyImpl,animeImpl
+from gocqhttpbot.botstart.util import SignUtil, wordUtil,memeImgGenerate,permissions,init
+import json, re,os,sys
 
 
 def guildController(data):
@@ -12,6 +12,11 @@ def guildController(data):
     user_id = str(data['user_id'])  # 触发用户id
     at_user = f'[CQ:at,qq={user_id}] '
     nickname = data['sender']['nickname']
+    #这是二次元老婆对话
+    anime = animeImpl.anime(message)
+    if anime:
+        GuildEntity.send_guild_channel_msg(guild_id, channel_id, anime)
+
 
     pass_path = '默认指令'
     # 获取指令路径并输出
@@ -20,33 +25,39 @@ def guildController(data):
             pass_path = i['content']
             break
 
-    if (message == '屏蔽' or message == '关闭') and (user_id == '144115218676755577' or user_id == str(
+    #屏蔽和口令命令
+    if (message == '屏蔽' or message == '关闭') and (user_id == str(init.CONFIG.masterId) or user_id == str(
             json.loads(GuildEntity.get_guild_meta_by_guest(guild_id))['data']['owner_id'])):
 
         GuildEntity.send_guild_channel_msg(guild_id, channel_id,
                                            at_user + wordUtil.addPermiss(guild_id, channel_id))
-    elif (message == '解除屏蔽' or message == '开启') and (user_id == '144115218676755577' or user_id == str(
+    elif (message == '解除屏蔽' or message == '开启') and (user_id == str(init.CONFIG.masterId) or user_id == str(
             json.loads(GuildEntity.get_guild_meta_by_guest(guild_id))['data']['owner_id'])):
         GuildEntity.send_guild_channel_msg(guild_id, channel_id,
                                            at_user + wordUtil.delete_Permiss(guild_id, channel_id))
-    elif message[:4] == '新增口令' and (user_id == '144115218676755577' or permissions.getPermissions(user_id)):
+    elif message[:4] == '新增口令' and (user_id == str(init.CONFIG.masterId) or permissions.getPermissions(user_id)):
 
         GuildEntity.send_guild_channel_msg(guild_id, channel_id, at_user +guildImpl.password(message,pass_path))
-    elif message[:4] == '删除口令' and (user_id == '144115218676755577' or permissions.getPermissions(user_id)):
+    elif message[:4] == '删除口令' and (user_id == str(init.CONFIG.masterId) or permissions.getPermissions(user_id)):
         GuildEntity.send_guild_channel_msg(guild_id, channel_id, at_user +guildImpl.delete_json(message[4:],pass_path))
     elif message == '查询口令':
         GuildEntity.send_guild_channel_msg(guild_id, channel_id, at_user + guildImpl.queryAll_json(pass_path))
-    elif message[:4] == '指令隔离'and (user_id == '144115218676755577'):
+    elif message[:4] == '指令隔离'and (user_id == str(init.CONFIG.masterId)):
         if message[4:] == '':
             GuildEntity.send_guild_channel_msg(guild_id,channel_id,at_user+'隔离内容为空')
         else:
             GuildEntity.send_guild_channel_msg(guild_id, channel_id, at_user +guildImpl.password(f'新增口令{guild_id}内容{message[4:]}','配置内容'))
-
     # 这是屏蔽功能
     if wordUtil.queryAllPermiss(guild_id, channel_id):
         return ''
+    #避免打扰到其他非战甲频道
+    if guildImpl.get_guil_name(guild_id, '战甲') or guildImpl.get_guil_name(guild_id, 'warframe'):
+        #这是战甲攻略
+        strategy = wfImpl.strategy(message)
+        if strategy:
+            GuildEntity.send_guild_channel_msg(guild_id, channel_id, at_user + strategy + '\n有问题请联系管理 何患')
 
-
+    #这是口令内容
     for j in pass_list(pass_path):
         if message == j['instruction']:
             GuildEntity.send_guild_channel_msg(guild_id, channel_id, at_user + j['content'])
@@ -63,8 +74,6 @@ def guildController(data):
         GuildEntity.send_guild_channel_msg(guild_id, channel_id, at_user + yuleImpl.chouqian(message, user_id))
     elif message == '一言' or message == '抽纸条':
         GuildEntity.send_guild_channel_msg(guild_id, channel_id, at_user + yuleImpl.yiyan())
-    # elif message == '段子' or message == '来个段子':
-    #     guildentity.send_guild_channel_msg(guild_id, channel_id, at_user +yuleimpl.duanzi())
     elif message[:3] == '查备案':
         GuildEntity.send_guild_channel_msg(guild_id, channel_id,
                                            at_user + yuleImpl.icp(message[3:]))
@@ -87,12 +96,11 @@ def guildController(data):
             GuildEntity.send_guild_channel_msg(guild_id, channel_id, at_user + '正在进行昼夜更替，稍后查询哦')
     elif message == '仲裁' or message == '仲裁任务':
         GuildEntity.send_guild_channel_msg(guild_id, channel_id, at_user + wfImpl.arbitration())
+    elif message == '中继站轮换' or message == '泰森':
+        GuildEntity.send_guild_channel_msg(guild_id, channel_id, at_user + wfImpl.steelPath())
     elif message[:4].lower() == 'wiki':
         message = message[4:].replace(" ", "")
         GuildEntity.send_guild_channel_msg(guild_id, channel_id, at_user + wfImpl.wiki(message))
-
-        # elif msg == '二次元':
-        #     botutils.groupmsg(loginqq, group, botImpl.二次元(loginqq, group))
     elif message[:2] == '遗物':
         message = message[2:].replace(" ","")
         GuildEntity.send_guild_channel_msg(guild_id, channel_id, at_user + wfImpl.search_relics(message))
@@ -114,11 +122,14 @@ def guildController(data):
             GuildEntity.send_guild_channel_msg(guild_id, channel_id, at_user + wfImpl.hw2())
         except:
             GuildEntity.send_guild_channel_msg(guild_id, channel_id, at_user + '当前查询出现了一点小状况，请联系作者修复')
-    elif message == '菜单':
-        if guildImpl.get_guil_name(guild_id,'战甲') or guildImpl.get_guil_name(guild_id,'warframe'):
-            GuildEntity.send_guild_channel_msg(guild_id, channel_id, at_user + wfImpl.caidan())
+
+    elif ('菜单' in message or '功能' in message) and len(message) < 6:
+        if message == '光遇菜单' or message == '光遇功能':
+            GuildEntity.send_guild_channel_msg(guild_id, channel_id, at_user + CQcode.images('images\\光遇\\菜单.JPG'))
+        elif message == '战甲菜单' or message == '战甲功能':
+            GuildEntity.send_guild_channel_msg(guild_id, channel_id, at_user + wfImpl.warframe())
         else:
-            GuildEntity.send_guild_channel_msg(guild_id, channel_id, at_user + CQcode.images('images/菜单.jpg'))
+            GuildEntity.send_guild_channel_msg(guild_id, channel_id,at_user + wfImpl.caidan())
     elif message == '奸商' or message == '虚空商人':
         try:
             GuildEntity.send_guild_channel_msg(guild_id, channel_id, at_user + wfImpl.voidTrader())
@@ -139,15 +150,13 @@ def guildController(data):
     elif message == '活动':
         GuildEntity.send_guild_channel_msg(guild_id, channel_id, at_user + wfImpl.allOutmsg('events'))
     elif message[:2].lower() == 'wm':
-        mod_rank = ''
-        if re.findall(f'[0-9]', message[2:]):
-            mod_ranks = re.findall(f'[0-9]', message[2:].replace(" ", ""))
-            for m in mod_ranks:
-                mod_rank = mod_rank + m
-            message = message[2:].replace(" ", "").replace(mod_rank, "")
-        else:
+        mod_rank = re.findall(f'[0-9]+', message)
+        if len(mod_rank) == 0:
             mod_rank = '0'
-            message = message[2:].replace(" ", "")
+        else:
+            mod_rank = mod_rank[0]
+        message = message[2:].replace(mod_rank, "").replace(" ", "")
+
         GuildEntity.send_guild_channel_msg(guild_id, channel_id, at_user + wfImpl.wfwm(message, mod_rank))
     # elif message=='功能' or message[:4] == '修改功能':
     #     menuImpl.sign(guild_id,channel_id,user_id,at_user,message)
@@ -156,7 +165,7 @@ def guildController(data):
         GuildEntity.send_guild_channel_msg(guild_id, channel_id, at_user + f'如有需要请联系Qq2996964572')
     elif '盲盒' in message:
         blind_box.box(json.dumps(data))
-    elif message[:4] == '全服狂欢' and user_id == '144115218676755577':
+    elif message[:4] == '全服狂欢' and user_id == str(init.CONFIG.masterId):
         blind_box.hilarity(guild_id, channel_id, message)
     elif '管理' in message:
         permissions.permissions(json.dumps(data))
@@ -168,10 +177,10 @@ def guildController(data):
 
     # 光遇功能
     elif '复刻' == message or '复刻先祖' == message:
-        GuildEntity.send_guild_channel_msg(guild_id, channel_id, at_user + skyImpl.task('本周复刻'))
+        GuildEntity.send_guild_channel_msg(guild_id, channel_id, at_user + skyImpl.task('P1预估兑换树'))
     elif '每日' == message or '每日任务' == message:
         GuildEntity.send_guild_channel_msg(guild_id, channel_id, at_user + skyImpl.task('每日任务'))
-    elif message == '更新缓存' and (user_id == '144115218676755577' or permissions.getPermissions(user_id)):
+    elif message == '更新缓存' and (user_id == str(init.CONFIG.masterId) or permissions.getPermissions(user_id)):
         GuildEntity.send_guild_channel_msg(guild_id, channel_id, at_user + skyImpl.shoudong())
     elif '兑换图' in message:
         GuildEntity.send_guild_channel_msg(guild_id, channel_id, at_user + skyImpl.figure(message.replace('兑换图', '')))
@@ -181,17 +190,16 @@ def guildController(data):
         return ''
     elif message == '签到':
         GuildEntity.send_guild_channel_msg(guild_id, channel_id,
-                                           at_user + SignUtil.addUser(guild_id, channel_id, user_id, nickname))
+                                           at_user + SignUtil.addUser(guild_id, user_id))
     elif message == '查询' or message == '我的萝卜':
         GuildEntity.send_guild_channel_msg(guild_id, channel_id,
                                            at_user + SignUtil.user_ById(guild_id, user_id))
     elif message[:2] == '查看':
         try:
-            at_qq = message[message.index('qq='):message.index(']')].replace('qq=', '')
-
+            # at_qq = message[message.index('qq='):message.index(']')].replace('qq=', '')
+            at_qq = re.findall('[0-9]+',message)[0]
             GuildEntity.send_guild_channel_msg(guild_id, channel_id, SignUtil.user_ById(guild_id, at_qq))
         except Exception as e:
-
             GuildEntity.send_guild_channel_msg(guild_id, channel_id, at_user + '你先艾特个人')
     elif message == '排行榜' or message == '萝卜榜':
         GuildEntity.send_guild_channel_msg(guild_id, channel_id,
@@ -200,34 +208,29 @@ def guildController(data):
         GuildEntity.send_guild_channel_msg(guild_id, channel_id,
                                            at_user + SignUtil.queryAll_json(guild_id, 1))
     elif '萝卜' in message:
-        SignUtil.sig_index(json.dumps(data))
+        SignUtil.sig_index_guild(json.dumps(data))
 
     elif message[:2] == '打劫' or message[:2] == '抢劫':
 
         try:
-            # at_qq = re.findall(f'\\[CQ:at,qq=(.*?)] ', message[2:])
-            at_qq = message[message.index('qq='):message.index(']')].replace('qq=', '')
+            at_qq = re.findall('[0-9]+',message)[0]
             GuildEntity.send_guild_channel_msg(guild_id, channel_id, SignUtil.rob(guild_id, user_id, at_qq))
         except:
             GuildEntity.send_guild_channel_msg(guild_id, channel_id, at_user + '你先艾特个人')
     elif message[:2] == '赠送':
         try:
-            numbers = ''
-            number = re.findall(f'[0-9]', message[message.index(']'):])
-            for i in number:
-                numbers = numbers + str(i)
-            at_qq = message[message.index('qq='):message.index(']')].replace('qq=', '')
+            numbers = re.findall('[0-9]+',message)[1]
+            at_qq = re.findall('[0-9]+', message)[0]
             GuildEntity.send_guild_channel_msg(guild_id, channel_id, SignUtil.give(guild_id, user_id, at_qq, int(numbers)))
         except:
             GuildEntity.send_guild_channel_msg(guild_id, channel_id, at_user + '没写数量？')
     elif '雇佣' in message:
-        hireImpl.hire(json.dumps(data))
+        hireImpl.hire_guild(json.dumps(data))
     elif message == '赞助' or message == '支持' or message == '赞助作者' or message == '支持作者':
         GuildEntity.send_guild_channel_msg(guild_id, channel_id, at_user + '赞助：https://afdian.net/@cat991')
-    elif any(str in message[:1] for str in ['打', '顶']):
-        memeImgGenerate.index(guild_id, channel_id, message, at_user)
-    elif message == '功能':
-        GuildEntity.send_guild_channel_msg(guild_id, channel_id, at_user + CQcode.images('images/菜单.jpg'))
+    elif any(str in message[:1] for str in ['打', '顶']) and len(message) < 5:
+        GuildEntity.send_guild_channel_msg(guild_id,channel_id,at_user+memeImgGenerate.index(message))
+
 
 # 获取指令内容
 def pass_list(path):

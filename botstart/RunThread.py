@@ -1,12 +1,13 @@
 from subprocess import Popen, PIPE, STDOUT
 from flask import Flask, request
-from gocqhttpbot.botstart.controller import GroupController, GuildController, SkyController,GroupHanderController
+from gocqhttpbot.botstart.controller import GroupController, GuildController, SkyController, GroupHanderController, WebBotController
 from gocqhttpbot.botstart.impl import hireImpl, skyImpl
+from gocqhttpbot.botstart.util import permissions
+
 import json, os, time
 from concurrent.futures import ThreadPoolExecutor
 
-executor = ThreadPoolExecutor(2)
-
+executor = ThreadPoolExecutor(5)
 import threading
 
 app = Flask(__name__)
@@ -33,18 +34,19 @@ def index():
 
     try:
         data = json.loads(data)
-        #群消息内容
+        # 群消息内容
         if 'message_type' in data:
             # 处理群消息
             if data['message_type'] == 'group':
+                # print(data)
                 executor.submit(GroupController.groupController, json.dumps(data))
             elif data['message_type'] == 'guild':
-            #处理频道消息
+                # 处理频道消息
                 executor.submit(GuildController.guildController, json.dumps(data))
             else:
                 pass
         elif 'request_type' in data:
-            executor.submit(GroupHanderController.groupHanderController,json.dumps(data))
+            executor.submit(GroupHanderController.groupHanderController, json.dumps(data))
     except Exception as result:
         print(data)
         print('未知错误%s' % result)
@@ -55,6 +57,12 @@ def index():
 @app.route('/skyApi/<specified>', methods=['GET', 'POST'])
 def skyApi(specified):
     return SkyController.heimao(specified)
+
+
+@app.route('/webbot/<message>', methods=['GET', 'POST'])
+def webbot(message):
+    res = executor.submit(WebBotController.webbot, message)
+    return res.result()
 
 
 class runapp(threading.Thread):
@@ -75,8 +83,9 @@ class runexe(threading.Thread):  # 继承父类threading.Thread
     def run(self):
         try:
             exe_command('go-cqhttp_windows_386.exe')
-        except:
-            print('核心文件运行失败')
+            # print()
+        except Exception as result:
+            print('核心文件运行失败%s' % result)
 
 
 class runhire(threading.Thread):  # 继承父类threading.Thread
@@ -88,7 +97,7 @@ class runhire(threading.Thread):  # 继承父类threading.Thread
             time.sleep(30)
             hireImpl.die()
         except Exception as result:
-            print('定时器出错%s' % result)
+            print('种萝卜监控出错%s' % result)
             time.sleep(5)
             hireImpl.die()
 
@@ -106,6 +115,20 @@ class runsky(threading.Thread):
             time.sleep(5)
             skyImpl.die()
 
+class del_msg_monitor(threading.Thread):
+    def __init__(self, ):
+        threading.Thread.__init__(self)
+
+    def run(self):
+        try:
+            time.sleep(20)
+            permissions.msg_monitor()
+        except Exception as result:
+            print('消息撤回监视器出错%s' % result)
+            time.sleep(5)
+            permissions.msg_monitor()
+
+
 
 def exe_command(command):
     """
@@ -119,12 +142,12 @@ def exe_command(command):
         print('作者Qq：2996964572')
         print('git开源地址：暂无')
         for line in iter(process.stdout.readline, b''):
-
+            # print(line.decode().strip())
             if '用户交流' in line.decode().strip() or '48;5' in line.decode().strip():
                 pass
             elif '扫描二维码' in line.decode().strip():
                 print(line.decode().strip())
-                print('扫描当前路径下生成的qrcode.png')
+                # print('扫描当前路径下生成的qrcode.png')
             else:
                 pass
                 # print(line.decode().strip())

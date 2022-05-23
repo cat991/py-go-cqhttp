@@ -2,3 +2,10 @@ def groupToImgOneLin(txt,imgUrl):
     return f'[CQ:xml,data=<?xml version="1.0" encoding="UTF-8" standalone="yes"?><msg serviceID="1"><item layout="4"><title>{txt}</title><picture cover="{imgUrl}"/></item></msg>]'
 def groupSmallImgToBigImg(url):
     return f'[CQ:cardimage,file={url}]'
+def ce1():
+    return """{"app":"com.tencent.channel.share","desc":"","view":"albumAddPic","ver":"1.0.0.1","prompt":"[测试]","appID":"","sourceName":"","actionData":"","actionData_A":"","sourceUrl":"","meta":{"detail":{"origin":"应用名","title":"标题","desc":"简介","img":"图标","link":"链接"}},"config":{"ctime":0,"autosize":1,"forward":0},"text":"","sourceAd":"","extra":""}"""
+def ce2():
+    return """{"app":"com.tencent.autoreply","desc":"","view":"autoreply","ver":"0.0.0.1","prompt":"自助问答","appID":"","sourceName":"","actionData":"","actionData_A":"","sourceUrl":"","meta":{"metadata":{"buttons":[{"action":"notify","action_data":"https://baidu.com","name":"点我发百度","slot":1}],"title":"这是标题","type":"guest"}},"config":{"showSender":0},"text":"","sourceAd":"","extra":""}"""
+def ce3():
+    return """<?xml version='1.0' encoding='UTF-8' standalone='yes' ?><msg serviceID="1" templateID="0" action="" brief="应用分享" sourceMsgId="0" url="" flag="5" adverSign="0" multiMsgFlag="0"><item layout="1" advertiser_id="0" aid="0"><picture cover="https://gchat.qpic.cn/gchatpic_new/1017065783/1017065783-2731142198-C53FBD149462EF59B498FD544C66890B/0" w="0" h="0" /></item><item layout="6" advertiser_id="0" aid="0"><title size="37" color="#FF4000" style="0">                         群管理（代理）：水水酱</title><hr hidden="false" style="0" /><title size="37" color="#FF4000" style="0">                             月卡低至9元</title><hr hidden="false" style="0" /><title size="37" color="#FF4000" style="0">                          永久授权仅需27元</title></item><item layout="3" advertiser_id="0" aid="0"><picture cover="https://vkceyugu.cdn.bspapp.com/VKCEYUGU-4584e94a-a71b-4b8c-8ee6-f54018c8f4be/11247fd5-06a0-4309-b4dd-13d242529f7c.gif" w="0" h="0" /></item><source name="" icon="" action="" appid="0" /></msg>
+"""

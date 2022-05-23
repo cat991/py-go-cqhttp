@@ -75,16 +75,22 @@ def dayTime():
     times = resp['cetus']['cetusTime']
     if day:
         times = int(times) - int(time.time())
-        hours = time.strftime('%H', time.localtime(times))
-        hours = int(hours) - 8
-        time1 = time.strftime('%M分%S秒', time.localtime(times))
-        return f'\t\n现在时间是--白天--\n剩余时间:{hours}时{time1}'
+        if times < 0:
+            return "现在正从白天轮换到晚上"
+        else:
+            hours = time.strftime('%H', time.localtime(times))
+            hours = int(hours) - 8
+            time1 = time.strftime('%M分%S秒', time.localtime(times))
+            return f'\t\n现在时间是--白天--\n剩余时间:{hours}时{time1}'
     else:
         times = times - int(time.time())
-        hours = time.strftime('%H', time.localtime(times))
-        hours = int(hours) - 8
-        time1 = time.strftime('%M分%S秒', time.localtime(times))
-        return f'\t\n现在时间是--晚上--\n剩余时间:{hours}时{time1}'
+        if times < 0:
+            return "\t\n现在正从晚上轮换到白天"
+        else:
+            hours = time.strftime('%H', time.localtime(times))
+            hours = int(hours) - 8
+            time1 = time.strftime('%M分%S秒', time.localtime(times))
+            return f'\t\n现在时间是--晚上--\n剩余时间:{hours}时{time1}'
 
 
 # 地球时间
@@ -121,6 +127,7 @@ def voidTrader():
 
 # 星际战甲金星温度判断
 def states(state):
+
     if state == 1:
         return '极寒'
     elif state == 2:
@@ -139,9 +146,14 @@ def jxwd():
     resp = json.loads(resp.text)
     times = resp['solaris']['solarisExpiry']
     state = resp['solaris']['state']
-    times = times - int(time.time())
-    time1 = time.strftime('%M分%S秒', time.localtime(times))
-    return f'\t\n现在温度是--{states(int(state))}--\n{time1}后切换\n--{states(state + 1)}--'
+    timemms = times - int(time.time())
+    if timemms < 0:
+        timemms = int(str(timemms).replace("-", ""))
+        time1 = time.strftime('%M分%S秒', time.localtime(timemms))
+        return f'\t\n山谷温度正从\n{states(int(state))}\n切换到\n{states(int(state + 1))}'
+    else:
+        time1 = time.strftime('%M分%S秒', time.localtime(timemms))
+        return f'\t\n现在温度是--{states(int(state))}--\n{time1}后切换\n--{states(state + 1)}--'
 
 
 # 火卫二时间
@@ -160,14 +172,24 @@ def wfrm(str):
     return otherImpl.toImage(resp, 'wfrm')
 
     # groupentity.uploadzkpic(group_id,resp,'wfrm','false')
-
+#中继站轮换 泰森
+def steelPath():
+    resp = requests.get('https://api.warframestat.us/pc').text
+    data = json.loads(resp)['steelPath']
+    return f'\n当前轮换内容是：\n{data["currentReward"]["name"]}\n需要钢精：{data["currentReward"]["cost"]}'
 
 # warframe物品交易
 def wfwm(msg, mod_rank):
+    if msg == "":
+        return "出现了一点小错误呢"
     str = {}
-    str['itme'] = botci(msg)
+    msg = botci(msg)
+    # print(msg)
+    # print(type(msg))
+    str['itme'] = msg["code"]
     str['mod_rank'] = int(mod_rank)
-    str['str'] = msg
+    if str['itme'] == '无':
+        return '暂时无该物品黑话信息或该物品本就无法交易'
     resp = requests.get(
         f'https://api.warframe.market/v1/items/{str["itme"].replace(" ", "_").lower()}/orders?include=item')
     resp = json.loads(resp.text)
@@ -175,7 +197,7 @@ def wfwm(msg, mod_rank):
         orderslist = resp['payload']['orders']
         orderslist = sorted(orderslist, key=lambda x: x["platinum"], reverse=False)
 
-        orderre = f'\t\n默认展示价格最低前10个\n你要搜索的是：{str["str"]} \n翻译：{str["itme"]}'
+        orderre = f'\t\n默认展示价格最低前10个\n你要搜索的是：{msg["main"]} \n翻译：{msg["zh"]}'
     except:
         return '\t\n搜索出现了一点小状况,检查是否错别字或重新查询'
     cont = 0  # 统计10个
@@ -209,43 +231,98 @@ def wfwm(msg, mod_rank):
 
 
 # 翻译&warframe查字典
-def botci(str):
-    resp = requests.get(f'http://nymph.rbq.life:3000/dict/tran/robot/{str.replace(" ", "")}').text
-    num = 0
-    # ret ={}
-    txt = ''
-    for lis in resp.split('\n'):
-        num += 1
-        if num == 2:
-            itme = re.findall(f'\\[(.*?)]', lis)
-            txt = itme[0]
-            # txt = itme[0].replace(' ', '_').lower()
-            # ret={
-            #     'itme':itme[0].replace(' ', '_').lower(),
-            #      'str':itme[0],
-            #     'mod_rank':mod_rank
-            # }
+def botci(keys, flag=True):
+    path = os.path.dirname(os.path.realpath(sys.argv[0])) + "\\WF_Sale.json"
+    # if any(str in keys for str in ['蓝', '头', '机', '体','系统','场景','枪','前纪','古纪','后纪','中纪','装饰']) and flag:
     try:
-        # return wfwm(ret)
-        return txt
-    except:
-        return resp
-#获取商品折扣
+        with open(path, "r", encoding="utf-8") as f:
+            file_list = json.loads(f.read())
+        #     print(type(file_list))
+        # keys = input("战甲")
+        if flag:
+            keys += "一套"
+        print(keys)
+        result = fuzzy_finder(keys, file_list)
+        if len(result) == 0 and flag:
+            return botci(keys.replace('一套', ''), False)
+        elif len(result) == 0 and flag == False:
+            return {
+                "main": "无",
+                "zh": "无",
+                "code": "无"
+            }
+        else:
+            return result[0]
+            # return result[len(result) - 1]
+    except Exception as e:
+        print("出现错误" % e)
+        if flag:
+            return botci(keys.replace('一套', ''), False)
+        else:
+            return {
+                "main": "无",
+                "zh": "无",
+                "code": "无"
+            }
+
+    # resp = requests.get(f'http://nymph.rbq.life:3000/dict/tran/robot/{str.replace(" ", "")}').text
+    # num = 0
+    # # ret ={}
+    # txt = ''
+    # for lis in resp.split('\n'):
+    #     num += 1
+    #     if num == 2:
+    #         itme = re.findall(f'\\[(.*?)]', lis)
+    #         txt = itme[0]
+    #         # txt = itme[0].replace(' ', '_').lower()
+    #         # ret={
+    #         #     'itme':itme[0].replace(' ', '_').lower(),
+    #         #      'str':itme[0],
+    #         #     'mod_rank':mod_rank
+    #         # }
+    # try:
+    #     # return wfwm(ret)
+    #     return txt
+    # except:
+    #     return resp
+
+
+def fuzzy_finder(key, data):
+    # 结果列表
+    suggestions = []
+    # 非贪婪匹配，转换 'djm' 为 'd.*?j.*?m'
+    pattern = '.*?'.join(key)
+    # pattern = '.*%s.*'%(key)
+    # print("pattern",pattern)
+    # 编译正则表达式
+    regex = re.compile(pattern)
+    for item in data:
+        # print("zh",item['zh'])
+        # 检查当前项是否与regex匹配。
+        match = regex.search(item['zh'].lower())
+        if match:
+            # 如果匹配，就添加到列表中
+            suggestions.append(item)
+    return suggestions
+
+
+# 获取商品折扣
 def dailyDeals():
     resp = requests.get('https://api.null00.com/world/ZHCN')
     resp = json.loads(resp.text)['dailyDeals']
     dail1 = '国服折扣：'
     for i in resp:
-        item = i['item']   #商品名称
-        times = i['expiry'] - time.time() #剩余时间
-        discount = str(i['discount']) + '%'#折扣百分比
-        originalPrice = i['originalPrice']#原价
-        salePrice = i['salePrice'] #折扣后的价格
-        residue = i['total'] - i['sold'] #剩余库存
+        item = i['item']  # 商品名称
+        times = i['expiry'] - time.time()  # 剩余时间
+        discount = str(i['discount']) + '%'  # 折扣百分比
+        originalPrice = i['originalPrice']  # 原价
+        salePrice = i['salePrice']  # 折扣后的价格
+        residue = i['total'] - i['sold']  # 剩余库存
         time1 = time.strftime('%H时%M分%S秒', time.localtime(times))
         dail1 += f'\n商品:{item} (-{discount})\n价格:{salePrice}({originalPrice})\n库存:{residue} \n时间:还剩余{time1}\n'
-    dail2 = '\n国际服折扣：'+allOutmsg('dailyDeals')
-    return  dail1 + dail2
+    dail2 = '\n国际服折扣：' + allOutmsg('dailyDeals')
+    return dail1 + dail2
+
 
 # 发送群公告
 def group_announcement(logonqq, msg):
@@ -255,8 +332,8 @@ def group_announcement(logonqq, msg):
 
 
 # 遗物查询功能
-def search_relics(search):
-    url = f'https://www.ourwarframe.com/app/api/index/list?page=1&pageSize=10&search={search}&type&stock'
+def search_relics(search, flg=False):
+    url = f'https://www.ourwarframe.com/app/api/index/list?page=1&pageSize=30&search={search}&type&stock'
     ret = ''
     resp = requests.get(url).text
     resp = json.loads(resp)
@@ -272,29 +349,75 @@ def search_relics(search):
             size = size + '暂未入库'
         else:
             size = size + '已入库'
-
         ret = ret + otherImpl.toImage(size, 'images\\遗物图片缓存\\relics' + str(cont))
         cont = cont + 1
-
+    content = []
+    if flg:
+        itemlist = re.findall('\[(.*?)]',ret)
+        for item in itemlist:
+            item = item.replace("\\", "/")
+            items = {
+                "type": "node",
+                "data": {
+                    "name": search,
+                    "uin": "180802337",
+                    "content": f'[{item}]'
+                }
+            }
+            content.append(items)
+        # print(str(content).replace("'",'"'))
+        return str(content).replace("'",'"')
     return ret
 
 
-# 菜单
+# 星际战甲菜单
 def caidan():
-    return f'\t\n你要的菜单来了' \
-           f'\n---菜单---' \
-           f'\n攻略  关键词' \
-           f'\nwiki  关键词' \
-           f'\n物品交易: wm ' \
-           f'\n紫卡交易：rm & zk' \
-           f'\n平原时间 & 地球时间' \
-           f'\n金星温度 ' \
-           f'\n火卫二 & hw2' \
-           f'\n虚空商人 & 奸商 ' \
-           f'\n双服突击 ' \
-           f'\n仲裁 & 仲裁任务' \
-           f'\n查询口令' \
-           f'\n遗物 关键词(仅支持国服)' \
-           f'\n ↓↓↓频道主命令↓↓↓' \
-           f'\n屏蔽 & 关闭' \
-           f'\n接触屏蔽 & 开启'
+    return """
+    ----当前菜单----
+    光遇菜单 | 战甲菜单
+    授权功能 | 赞助作者
+    """
+
+def warframe():
+    return """
+        \t你要的菜单来了
+        -----菜单-----
+        \t攻略  关键词
+        \twiki  关键词 
+        \t物品交易: wm  
+        \t紫卡交易：rm & zk 
+        \t平原时间 & 地球时间 
+        \t金星温度 
+        \t火卫二 & hw2 
+        \t虚空商人 & 奸商  
+        \t双服突击 
+        \t仲裁 & 仲裁任务 
+        \t查询口令
+        \t遗物 关键词(仅支持国服) 
+        \t中继站轮换 & 泰森
+        \t---频道主命令---
+        \t屏蔽 & 关闭
+        \t接触屏蔽 & 开启
+    """
+
+def strategy(txt):
+    onePath = os.path.dirname(os.path.realpath(sys.argv[0])) + f'\\频道数据\\星际战甲攻略数据'
+    # onePath = f'..\\..\\..\\频道数据\\星际战甲攻略数据'
+    pathName = ''
+    for filename in os.listdir(onePath):
+        if txt in filename:
+            pathName = filename
+            break
+    if pathName == '':
+        return False
+    pathNew = onePath + f'\\{pathName}\\'
+    with open(pathNew + '内容.txt', 'r', encoding='utf-8')as f:
+        content = f.read()
+        # print('内容--------------', content)
+        f.close()
+    finlist = re.findall(f'\[(.*?)]', content)
+    for finImg in finlist:
+        content = content.replace(f'[{finImg}]', f'[CQ:image,file=file:///{pathNew}/{finImg}]')
+    return content
+
+    # path = os.path.dirname(os.path.realpath(sys.argv[0])) + "\\WF_Sale.json"

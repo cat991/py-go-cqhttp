@@ -1,7 +1,7 @@
-from gocqhttpbot.botstart.entity import GuildEntity, CQcode, GroupEntity
-from gocqhttpbot.botstart.util import textToImg, SignUtil,permissions
-import json, re, time, os, sys, random
-from time import localtime, strftime, time
+from gocqhttpbot.botstart.entity import GuildEntity, CQcode
+from gocqhttpbot.botstart.util import  SignUtil,permissions,init
+import json, os, sys, random
+from time import localtime, strftime
 
 
 # 抽盲盒需要的消费
@@ -220,7 +220,7 @@ def box(datas):
     elif message == '盲盒功能':
         functionss(guild_id, channel_id, at_user)
     elif message[:6] == '销毁男生盲盒' or message[:6] == '销毁女生盲盒' :
-        if user_id == '144115218676755577' or permissions.getPermissions(user_id):
+        if user_id == str(init.CONFIG.masterId) or permissions.getPermissions(user_id):
             delete_box(guild_id, channel_id,user_id, at_user, message,True)
         else:
             delete_box(guild_id, channel_id,user_id, at_user, message)
