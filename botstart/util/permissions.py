@@ -3,10 +3,11 @@ from gocqhttpbot.botstart.entity import GuildEntity, GroupEntity
 from gocqhttpbot.botstart.util import init
 import time, re, uuid
 
+from gocqhttpbot import PATH
 
 # 添加权限用户
 def addPermissions(guild_id, channel_id, user_id: str, day: int):
-    beneath = os.path.dirname(os.path.realpath(sys.argv[0])) + f'\\权限\\权限管理列表.json'
+    beneath = PATH + f'\\权限\\权限管理列表.json'
     expiration = time.time() + (60 * 60 * 24 * day)
     word = {
         'user_id': user_id,
@@ -51,7 +52,7 @@ def addPermissions(guild_id, channel_id, user_id: str, day: int):
 
 # 删除用户的权限
 def detPermissions(user_id):
-    beneath = os.path.dirname(os.path.realpath(sys.argv[0])) + f'\\权限\\权限管理列表.json'
+    beneath = PATH + f'\\权限\\权限管理列表.json'
     cont = 0
     try:
         with open(beneath, 'r', encoding='utf-8') as f:
@@ -71,7 +72,7 @@ def detPermissions(user_id):
 
 # 获取是否拥有权限
 def getPermissions(user_id):
-    beneath = os.path.dirname(os.path.realpath(sys.argv[0])) + f'\\权限\\权限管理列表.json'
+    beneath = PATH + f'\\权限\\权限管理列表.json'
     try:
         with open(beneath, 'r', encoding='utf-8') as f:
             per = json.loads(f.read())
@@ -81,10 +82,11 @@ def getPermissions(user_id):
                     return True
             else:
                 return False
-    except:
+    except Exception as e:
+        print("权限管理出现错误%s" % e)
         return False
 
-
+# 添加管理员
 def permissions(data):
     data = json.loads(data)
     message = data['message']  # 消息
@@ -102,7 +104,7 @@ def permissions(data):
             GuildEntity.send_guild_channel_msg(guild_id, channel_id,
                                                '不支持的操作')
         else:
-            print(numbers)
+            # print(numbers)
             addPermissions(guild_id, channel_id, at_qq, int(numbers))
     elif message[:4] == '删除管理':
         at_qq = message[message.index('qq='):message.index(']')].replace('qq=', '')
@@ -121,7 +123,7 @@ def add_msg_id(data):
         "msg_id": msg_id,
         "time": int(time.time())
     }
-    path = os.path.dirname(os.path.realpath(sys.argv[0])) + f'\\data\\撤回消息id.json'
+    path = PATH + f'\\data\\撤回消息id.json'
     if not os.path.exists(path):
         old_data = [data]
     else:
@@ -137,7 +139,7 @@ def add_msg_id(data):
 def msg_monitor():
     while (True):
         time.sleep(10)
-        path = os.path.dirname(os.path.realpath(sys.argv[0])) + f'\\data\\撤回消息id.json'
+        path = PATH + f'\\data\\撤回消息id.json'
         with open(path, 'r', encoding='utf-8') as f:
             per = json.loads(f.read())
             f.close()
@@ -155,8 +157,8 @@ def msg_monitor():
 # -------------------授权功能------------------------------
 # 进行授权
 def auth(group_id, auth_code):
-    auth_path = os.path.dirname(os.path.realpath(sys.argv[0])) + f'\\data\\config\\group\\code.json'
-    path = os.path.dirname(os.path.realpath(sys.argv[0])) + f'\\data\\config\\group\\authdb.json'
+    auth_path = PATH + f'\\data\\config\\group\\code.json'
+    path = PATH + f'\\data\\config\\group\\authdb.json'
     with open(auth_path, 'r', encoding='utf-8')as f:
         if auth_code == f.read():
             f.close()
@@ -179,7 +181,7 @@ def auth(group_id, auth_code):
 
 # 获取授权码
 def get_auth_code():
-    path = os.path.dirname(os.path.realpath(sys.argv[0])) + f'\\data\\config\\group\\code.json'
+    path = PATH + f'\\data\\config\\group\\code.json'
     code = uuid.uuid4()
     with open(path, 'w', encoding='utf-8') as f:
         # json.dump(code, f, ensure_ascii=False)
@@ -187,26 +189,29 @@ def get_auth_code():
         f.close()
     return str(code)
 
-#取消群授权
+
+# 取消群授权
 def delAuth(group_id):
-    path = os.path.dirname(os.path.realpath(sys.argv[0])) + f'\\data\\config\\group\\authdb.json'
-    with open(path,'r',encoding='utf-8')as f:
+    path = PATH + f'\\data\\config\\group\\authdb.json'
+    with open(path, 'r', encoding='utf-8')as f:
         ls = list(json.loads(f.read()))
         f.close()
         cont = 0
         for i in ls:
             if group_id == i:
                 del ls[cont]
-                with open(path,'w',encoding='utf-8')as f2:
-                    json.dump(ls,f2,ensure_ascii=False)
+                with open(path, 'w', encoding='utf-8')as f2:
+                    json.dump(ls, f2, ensure_ascii=False)
                     f2.close()
                 return '取消授权成功'
             cont += 1
     return '取消授权失败，该群未授权'
+
+
 # 获取授权信息
 def get_auth(group_id) -> bool:
     data = []
-    path = os.path.dirname(os.path.realpath(sys.argv[0])) + f'\\data\\config\\group\\authdb.json'
+    path = PATH + f'\\data\\config\\group\\authdb.json'
     if os.path.exists(path):
         with open(path, 'r', encoding='utf-8')as f:
             data = json.loads(f.read())

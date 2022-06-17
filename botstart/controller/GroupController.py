@@ -4,6 +4,7 @@ import json, re, os, sys,random
 
 # 发送群消息
 from gocqhttpbot.botstart.util import memeImgGenerate, SignUtil,permissions,init
+from gocqhttpbot import log
 
 def groupController(data):
     # print('进入群消息处理'+data)
@@ -17,11 +18,12 @@ def groupController(data):
     message = data['message']  # 消息内容
     user_id = str(data['user_id'])  # 触发用户id
     at_id = f'[CQ:at,qq={user_id}]'
-    print(f'收到用户{user_id}  的消息：{message}')
+    nickname = data['sender']['nickname']
+    log.info(f'收到 来自群内用户{nickname}  说  { message if len(message)<20 else message[:20] + "..."}')
     # 二次元老婆对话
     anime = animeImpl.anime(message)
     if anime:
-        GroupEntity.send_group_msg(group_id, anime)
+        GroupEntity.send_group_msg(group_id, anime,False)
 
     role = data['sender']['role']  # 获取权限 owner 或 admin 或 member
 
@@ -62,8 +64,10 @@ def groupController(data):
         GroupEntity.send_group_msg(group_id, at_id + permissions.auth(group_id, message[2:]))
 
 
-    if message == '语音权限':
-        GroupEntity.send_group_msg(group_id, GroupEntity.can_send_record())
+    if message == '测试':
+        pass
+        # GroupEntity.send_group_msg(group_id, GroupEntity.can_send_record())
+        # GroupEntity.send_group_msg(group_id,animeImpl.crazy())
      #-----授权功能-------------------------------------------------------
     elif message == '获取授权码' and user_id == str(init.CONFIG.master):
         GroupEntity.send_group_msg(group_id, at_id + permissions.get_auth_code())
@@ -149,6 +153,8 @@ def groupController(data):
             GroupEntity.send_group_msg(group_id, at_id + wfImpl.warframe())
         else:
             GroupEntity.send_group_msg(group_id,at_id + wfImpl.caidan())
+    elif message == '疯狂星期四':
+        GroupEntity.send_group_msg(group_id, animeImpl.crazy())
     elif "授权功能" == message :
         GroupEntity.send_group_msg(group_id,"授权以激活使用萝卜丁娱乐功能，如签到，雇佣，种萝卜")
     elif message == '奸商' or message == '虚空商人':
@@ -198,9 +204,9 @@ def groupController(data):
         #     message = message[2:].replace(" ", "")
         GroupEntity.send_group_msg(group_id, at_id + wfImpl.wfwm(message, mod_rank))
     elif '复刻' == message or '复刻先祖' == message:
-        GroupEntity.send_group_msg(group_id, at_id + skyImpl.task('P1预估兑换树'))
+        GroupEntity.send_group_msg(group_id, at_id + skyImpl.task('P1预估兑换树'),False)
     elif '每日' == message or '每日任务' == message:
-        GroupEntity.send_group_msg(group_id, at_id + skyImpl.task('每日任务'))
+        GroupEntity.send_group_msg(group_id, at_id + skyImpl.task('日常'),False)
     elif message == '更新缓存' and user_id == str(init.CONFIG.master):
         GroupEntity.send_group_msg(group_id, at_id + skyImpl.shoudong())
     elif '兑换图' in message:

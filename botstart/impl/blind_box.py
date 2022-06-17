@@ -2,7 +2,7 @@ from gocqhttpbot.botstart.entity import GuildEntity, CQcode
 from gocqhttpbot.botstart.util import  SignUtil,permissions,init
 import json, os, sys, random
 from time import localtime, strftime
-
+from gocqhttpbot import PATH
 
 # 抽盲盒需要的消费
 smoke_blind_box_number = 38
@@ -14,9 +14,9 @@ put_box_number = 18
 def smoke_blind_box(guild_id, channel_id, user_id, at_user, message):
 
     if '男生' in message:
-        bypath = os.path.dirname(os.path.realpath(sys.argv[0])) + f'\\频道数据\\盲盒数据\\男生盲盒.json'
+        bypath = PATH + f'\\频道数据\\盲盒数据\\男生盲盒.json'
     else:
-        bypath = os.path.dirname(os.path.realpath(sys.argv[0])) + f'\\频道数据\\盲盒数据\\女生盲盒.json'
+        bypath = PATH + f'\\频道数据\\盲盒数据\\女生盲盒.json'
 
     if SignUtil.judge(guild_id, user_id):
         return GuildEntity.send_guild_channel_msg(guild_id, channel_id, at_user + '数据库中没有你的数据，请先签到，发送：签到')
@@ -53,9 +53,9 @@ def smoke_blind_box(guild_id, channel_id, user_id, at_user, message):
 # 放入盲盒
 def put_blind_box(guild_id, channel_id, user_id, at_user, message):
     if '男生' in message:
-        bypath = os.path.dirname(os.path.realpath(sys.argv[0])) + f'\\频道数据\\盲盒数据\\男生盲盒.json'
+        bypath = PATH + f'\\频道数据\\盲盒数据\\男生盲盒.json'
     else:
-        bypath = os.path.dirname(os.path.realpath(sys.argv[0])) + f'\\频道数据\\盲盒数据\\女生盲盒.json'
+        bypath = PATH + f'\\频道数据\\盲盒数据\\女生盲盒.json'
     if SignUtil.judge(guild_id, user_id):
         return GuildEntity.send_guild_channel_msg(guild_id, channel_id, at_user + '数据库中没有你的数据，请先签到，发送：签到')
 
@@ -106,7 +106,7 @@ def user_box(guild_id, channel_id, user_id, at_user):
     box_content_nan = '男生盲盒：\n'
     box_content_nv = '女生盲盒：\n'
 
-    bypath1 = os.path.dirname(os.path.realpath(sys.argv[0])) + f'\\频道数据\\盲盒数据\\男生盲盒.json'
+    bypath1 = PATH + f'\\频道数据\\盲盒数据\\男生盲盒.json'
     cont = 0
     with open(bypath1, 'r', encoding='utf-8') as f1:
         data1 = json.loads(f1.read())
@@ -115,7 +115,7 @@ def user_box(guild_id, channel_id, user_id, at_user):
             if i['user_id'] == user_id:
                 box_content_nan = box_content_nan + f'盲盒编号：{str(cont)},({i["cont"]})内容{i["content"][:4]}\n'
             cont += 1
-    bypath2 = os.path.dirname(os.path.realpath(sys.argv[0])) + f'\\频道数据\\盲盒数据\\女生盲盒.json'
+    bypath2 = PATH + f'\\频道数据\\盲盒数据\\女生盲盒.json'
     cont = 0
     with open(bypath2, 'r', encoding='utf-8') as f2:
         data2 = json.loads(f2.read())
@@ -133,7 +133,7 @@ def user_box(guild_id, channel_id, user_id, at_user):
 # 判断用户是否有足够多的萝卜
 def radish(guil_id, user_id, number):
     ym = strftime("%Y年%m月", localtime())
-    beneath = os.path.dirname(os.path.realpath(sys.argv[0])) + f'\\频道数据\\{ym + guil_id}.json'
+    beneath = PATH + f'\\频道数据\\{ym + guil_id}.json'
     cont = 0
     user_id_text = ''
     item_list = ''
@@ -156,9 +156,9 @@ def radish(guil_id, user_id, number):
 # 销毁盲盒
 def delete_box(guild_id, channel_id, user_id, at_user, message,admin=False):
     if '男生' in message:
-        bypath = os.path.dirname(os.path.realpath(sys.argv[0])) + f'\\频道数据\\盲盒数据\\男生盲盒.json'
+        bypath = PATH + f'\\频道数据\\盲盒数据\\男生盲盒.json'
     else:
-        bypath = os.path.dirname(os.path.realpath(sys.argv[0])) + f'\\频道数据\\盲盒数据\\女生盲盒.json'
+        bypath = PATH + f'\\频道数据\\盲盒数据\\女生盲盒.json'
     cont = message[6:]
     try:
         with open(bypath, 'r', encoding='utf-8') as f:
@@ -184,7 +184,7 @@ def delete_box(guild_id, channel_id, user_id, at_user, message,admin=False):
                                                   at_user + f'编号{str(cont)}盲盒销毁失败，原因可能是数据库没有该编号数据')
 #增加所有频道的所有萝卜
 def hilarity(guild_id, channel_id,message):
-    botpath = os.path.dirname(os.path.realpath(sys.argv[0])) + f'\\频道数据'
+    botpath = PATH + f'\\频道数据'
     listFile = os.listdir(botpath)
     ym = strftime("%Y年%m月", localtime())
     number = message[4:]

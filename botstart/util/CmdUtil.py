@@ -2,11 +2,14 @@ import sys
 from PIL import Image
 import numpy as np
 import os
+from gocqhttpbot import PATH
+
+
 
 def pushImg():
     pic = ''
     try:
-        pic = os.path.dirname(os.path.realpath(sys.argv[0])) + '\gocqhttpbot\qrcode.png'  # 获取图片路径参数
+        pic = PATH + '\gocqhttpbot\qrcode.png'  # 获取图片路径参数
     except:
         pass
     img = Image.open(pic)  # 获取图片对象
@@ -30,7 +33,7 @@ def pushImg():
 
 
 def main():
-    file = os.path.dirname(os.path.realpath(sys.argv[0])) + '\gocqhttpbot\qrcode.png'
+    file = PATH + '\gocqhttpbot\qrcode.png'
     img = np.array(Image.open(file).convert('L'), 'f')
     #img1=np.zeros(shape=[51,51])
     img1=img[0:img.shape[0]:5,0:img.shape[1]:5]

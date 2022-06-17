@@ -1,4 +1,4 @@
-import requests
+import requests,random
 
 from gocqhttpbot.botstart.util import permissions
 
@@ -14,9 +14,9 @@ def send_guild_channel_msg(guild_id, channel_id, message):
     data = {
         "guild_id": guild_id,
         "channel_id": channel_id,
-        "message": message
+        "message": message+ ('\n机器人是免费的,如果你喜欢的话可以点击链接赞助作者哦~\n地址:https://dun.mianbaoduo.com/@heimao' if random.randint(1,10) == 5  else ''),
     }
-    print(requests.post(url, data).text)
+    requests.post(url, data)
     # permissions.add_msg_id(requests.post(url, data).text)
 
 # 获取频道元数据

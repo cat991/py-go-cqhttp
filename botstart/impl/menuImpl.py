@@ -1,9 +1,10 @@
 from gocqhttpbot.botstart.entity import GuildEntity, CQcode
 from gocqhttpbot.botstart.util import textToImg
 import os,sys
+from gocqhttpbot import PATH
 
 def sign(guild_id, channel_id,user_id,at_user,message):
-    botpath = os.path.dirname(os.path.realpath(sys.argv[0])) + f'\\频道数据\\功能菜单.json'
+    botpath = PATH + f'\\频道数据\\功能菜单.json'
     if message[:4] == '修改功能' and user_id == '144115218676755577':
         with open(botpath , 'w' ,encoding='utf-8')as f:
             f.write(message[4:])

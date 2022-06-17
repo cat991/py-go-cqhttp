@@ -2,7 +2,7 @@ import os, json, sys, random, datetime, re
 from time import localtime, strftime, time
 from gocqhttpbot.botstart.entity import CQcode, GuildEntity,GroupEntity
 from gocqhttpbot.botstart.util import permissions,init
-
+from gocqhttpbot import PATH
 # 添加用户
 word = {}
 texterre = ['🍒打劫失败：你被单杀并且被嘲讽失去了萝卜🥕',
@@ -48,7 +48,7 @@ def addUser(guil_id, user_id):
 # 用户校验接口
 def judge(guild_id, user_id):
     ym = strftime("%Y年%m月", localtime())
-    botpath = os.path.dirname(os.path.realpath(sys.argv[0])) + f'\\频道数据\\{ym + guild_id}.json'
+    botpath = PATH + f'\\频道数据\\{ym + guild_id}.json'
     try:
         with open(botpath, 'r', encoding='utf-8') as f:
             item_list = json.loads(f.read())
@@ -64,7 +64,7 @@ def judge(guild_id, user_id):
 # 判断用户萝卜数量是否这么多
 def get_user_radish_number(guild_id, user_id, number):
     ym = strftime("%Y年%m月", localtime())
-    botpath = os.path.dirname(os.path.realpath(sys.argv[0])) + f'\\频道数据\\{ym + guild_id}.json'
+    botpath = PATH + f'\\频道数据\\{ym + guild_id}.json'
     with open(botpath, 'r', encoding='utf-8')as f:
         flist = json.loads(f.read())
         for i in flist:
@@ -79,7 +79,7 @@ def user_ById(guil_id, user_id):
     global planting
     ym = strftime("%Y年%m月", localtime())
     day = strftime("%d日", localtime())
-    botpath = os.path.dirname(os.path.realpath(sys.argv[0])) + f'\\频道数据\\{ym + guil_id}.json'
+    botpath = PATH + f'\\频道数据\\{ym + guil_id}.json'
     try:
         with open(botpath, 'r', encoding='utf-8') as f:
             item_list = json.loads(f.read())
@@ -128,7 +128,7 @@ def queryAll_json(guil_id, m=0):
         ym = (datetime.datetime.now() + datetime.timedelta(days=-30)).strftime("%Y年%m月")
     day = strftime("%d日", localtime())
     try:
-        botpath = os.path.dirname(os.path.realpath(sys.argv[0])) + f'\\频道数据\\{ym + guil_id}.json'
+        botpath = PATH + f'\\频道数据\\{ym + guil_id}.json'
         content = '\n排行榜如下：\n'
         cont = 1
         with open(botpath, 'r', encoding='utf-8') as f:
@@ -148,7 +148,7 @@ def queryAll_json(guil_id, m=0):
 def delete_json(guil_id, at_id):
     ym = strftime("%Y年%m月", localtime())
     day = strftime("%d日", localtime())
-    botpath = os.path.dirname(os.path.realpath(sys.argv[0])) + f'\\频道数据\\{ym + guil_id}.json'
+    botpath = PATH + f'\\频道数据\\{ym + guil_id}.json'
     cont = 0
     with open(botpath, 'r', encoding='utf-8') as f:
         item_list = json.loads(f.read())
@@ -169,7 +169,7 @@ def write_json(guild_id, obj):
     # 首先读取已有的json文件中的内容
     ym = strftime("%Y年%m月", localtime())
     day = strftime("%d日", localtime())
-    botpath = os.path.dirname(os.path.realpath(sys.argv[0])) + f'\\频道数据\\{ym + guild_id}.json'
+    botpath = PATH + f'\\频道数据\\{ym + guild_id}.json'
     cont = 0
     with open(botpath, 'r', encoding='utf-8') as f:
         item_list = json.loads(f.read())
@@ -207,7 +207,7 @@ def rob(guil_id, user_id, at_id):
     radish = random.randint(5, 8)
     ran = random.randint(0, 2)
     ym = strftime("%Y年%m月", localtime())
-    beneath = os.path.dirname(os.path.realpath(sys.argv[0])) + f'\\频道数据\\{ym + guil_id}.json'
+    beneath = PATH + f'\\频道数据\\{ym + guil_id}.json'
     cont = 0
     user_id_text = ''
     at_id_text = ''
@@ -246,7 +246,7 @@ def rob(guil_id, user_id, at_id):
 def pull(guil_id, user_id):
     shu = random.randint(2, 5)
     ym = strftime("%Y年%m月", localtime())
-    botpath = os.path.dirname(os.path.realpath(sys.argv[0])) + f'\\频道数据\\{ym + guil_id}.json'
+    botpath = PATH + f'\\频道数据\\{ym + guil_id}.json'
 
     try:
         with open(botpath, 'r', encoding='utf-8') as f:
@@ -278,7 +278,7 @@ def seed(guil_id, user_id):
     if judge(guil_id, user_id):
         return '数据库中没有你的数据，请先签到，发送：签到'
     ym = strftime("%Y年%m月", localtime())
-    botpath = os.path.dirname(os.path.realpath(sys.argv[0])) + f'\\频道数据\\{ym + guil_id}.json'
+    botpath = PATH + f'\\频道数据\\{ym + guil_id}.json'
     try:
         with open(botpath, 'r', encoding='utf-8') as f:
             item_list = json.loads(f.read())
@@ -302,7 +302,7 @@ def seed(guil_id, user_id):
 # 修改打劫后的次数和萝卜数量
 def updataradish(guil_id, radish, user_id, rob, unrob, give, atuser_id=""):
     ym = strftime("%Y年%m月", localtime())
-    botpath = os.path.dirname(os.path.realpath(sys.argv[0])) + f'\\频道数据\\{ym + guil_id}.json'
+    botpath = PATH + f'\\频道数据\\{ym + guil_id}.json'
 
     cont = 0
     with open(botpath, 'r', encoding='utf-8') as f:
@@ -330,7 +330,7 @@ def updataradish(guil_id, radish, user_id, rob, unrob, give, atuser_id=""):
 # 赠送萝卜
 def give(guil_id, user_id, at_id, number):
     ym = strftime("%Y年%m月", localtime())
-    beneath = os.path.dirname(os.path.realpath(sys.argv[0])) + f'\\频道数据\\{ym + guil_id}.json'
+    beneath = PATH + f'\\频道数据\\{ym + guil_id}.json'
     cont = 0
     user_id_text = ''
     at_id_text = ''

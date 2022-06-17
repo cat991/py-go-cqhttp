@@ -3,7 +3,7 @@ from flask import Flask, request
 from gocqhttpbot.botstart.controller import GroupController, GuildController, SkyController, GroupHanderController, WebBotController
 from gocqhttpbot.botstart.impl import hireImpl, skyImpl
 from gocqhttpbot.botstart.util import permissions
-
+from gocqhttpbot import log
 import json, os, time
 from concurrent.futures import ThreadPoolExecutor
 
@@ -11,15 +11,15 @@ executor = ThreadPoolExecutor(5)
 import threading
 
 app = Flask(__name__)
-
+app.register_blueprint(SkyController.sky)
 configs = {
     'textcont': 0
 }
-
+startTiem = time.time()
 
 # 清空命令行
 def clear():
-    if configs['textcont'] == 20:
+    if configs['textcont'] == 30:
         os.system('cls')
         configs['textcont'] = 0
     else:
@@ -54,9 +54,9 @@ def index():
     return request.get_data()
 
 
-@app.route('/skyApi/<specified>', methods=['GET', 'POST'])
-def skyApi(specified):
-    return SkyController.heimao(specified)
+# @app.route('/skyApi/<specified>', methods=['GET', 'POST'])
+# def skyApi(specified):
+#     return SkyController.heimao(specified)
 
 
 @app.route('/webbot/<message>', methods=['GET', 'POST'])
@@ -137,17 +137,16 @@ def exe_command(command):
     :return: process, exitcode
     """
     process = Popen(command, stdout=PIPE, stderr=STDOUT, shell=True)
-
     with process.stdout:
-        print('作者Qq：2996964572')
-        print('git开源地址：暂无')
+
+        log.info('作者Qq：2996964572')
+        log.info('git开源地址：暂无')
         for line in iter(process.stdout.readline, b''):
             # print(line.decode().strip())
             if '用户交流' in line.decode().strip() or '48;5' in line.decode().strip():
                 pass
-            elif '扫描二维码' in line.decode().strip():
-                print(line.decode().strip())
-                # print('扫描当前路径下生成的qrcode.png')
+            elif (time.time() - startTiem) < 20:
+                log.info(str(line.decode().strip()))
             else:
                 pass
                 # print(line.decode().strip())
@@ -155,7 +154,8 @@ def exe_command(command):
     exitcode = process.wait()
     return process, exitcode
 
-
+import logging
+logging.getLogger("werkzeug").setLevel(logging.ERROR)
 def run():
     # app.run(host='127.0.0.1', port=5701, debug=True)
     app.run(host='0.0.0.0', port=5701, debug=False)

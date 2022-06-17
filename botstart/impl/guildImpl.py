@@ -1,6 +1,6 @@
 from gocqhttpbot.botstart.entity import GuildEntity,GroupEntity
-import json,os,sys
-
+import json
+from gocqhttpbot import PATH
 #获取频道名称
 def get_guil_name(guild_id,text):
   data = GuildEntity.get_guild_meta_by_guest(guild_id)
@@ -25,7 +25,7 @@ def get_group_info(group_id,text):
 #输出和写入json数据到文件
 def write_json(obj,path):
     #首先读取已有的json文件中的内容
-    botpath = os.path.dirname(os.path.realpath(sys.argv[0])) + f'\\频道数据\\指令\\{path}.json'
+    botpath = PATH + f'\\频道数据\\指令\\{path}.json'
     cont = 0
     with open(botpath, 'r',encoding='utf-8') as f:
         item_list = json.loads(f.read())
@@ -62,7 +62,7 @@ def password(msg,path):
 
 #查询所有口令
 def queryAll_json(path):
-    botpath = os.path.dirname(os.path.realpath(sys.argv[0])) + f'\\频道数据\\指令\\{path}.json'
+    botpath = PATH + f'\\频道数据\\指令\\{path}.json'
     cont = ''
     with open(botpath, 'r', encoding='utf-8') as f:
         item_list = json.loads(f.read())
@@ -72,7 +72,7 @@ def queryAll_json(path):
     return cont
 #删除json节点
 def delete_json(msg,path):
-    botpath = os.path.dirname(os.path.realpath(sys.argv[0])) + f'\\频道数据\\指令\\{path}.json'
+    botpath = PATH + f'\\频道数据\\指令\\{path}.json'
     cont = 0
     with open(botpath, 'r', encoding='utf-8') as f:
         item_list = json.loads(f.read())

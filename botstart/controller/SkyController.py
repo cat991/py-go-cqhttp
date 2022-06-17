@@ -1,5 +1,10 @@
 import os, sys, json, re
+from flask import Blueprint
+sky = Blueprint("sky",__name__,url_prefix="/skyApi")
 
+@sky.route('/<specified>', methods=['GET', 'POST'])
+def skyApi(specified):
+    return heimao(specified)
 
 def heimao(specified):
     # 每日任务

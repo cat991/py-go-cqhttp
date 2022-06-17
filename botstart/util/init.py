@@ -1,5 +1,5 @@
 import os, sys, yaml
-
+from gocqhttpbot import PATH
 
 class CONFIG():
     botqq: int
@@ -18,7 +18,8 @@ def get_config():
     # print("os.getcwd() = ", os.getcwd())
     # config_path = os.path.join(os.getcwd(), "..") + f'\\data\\config\\config.yml'
     # config_path = os.path.abspath(os.path.join(os.getcwd(), "..")) + f'\\data\\config\\config.yml'
-    config_path = os.path.dirname(os.path.realpath(sys.argv[0])) + f'\\data\\config\\config.yml'
+    # config_path = os.path.dirname(os.path.realpath(sys.argv[0])) + f'\\data\\config\\config.yml'
+    config_path = PATH + f'\\data\\config\\config.yml'
     print("读取到路径" + config_path)
     with open(config_path, "r", encoding="utf8")as f:
         config = yaml.load(f.read(), yaml.CLoader)

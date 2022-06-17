@@ -3,6 +3,7 @@ from gocqhttpbot.botstart.entity import CQcode
 from gocqhttpbot.botstart.impl import otherImpl
 import urllib.request
 import json,os,sys,time
+from gocqhttpbot import PATH
 #定义要爬取的微博大V的微博ID
 uid='7360748659'
 
@@ -12,7 +13,7 @@ proxy_addr="122.241.72.191:808"
 #每日任务
 def task(specified):
     imagesCQ = ''
-    botpath = os.path.dirname(os.path.realpath(sys.argv[0])) + f'\\频道数据\\光遇缓存数据\\{specified}.json'
+    botpath = PATH + f'\\频道数据\\光遇缓存数据\\{specified}.json'
     # resp = requests.get('https://m.weibo.cn/statuses/show?id=' + get_weibo(uid)).text
     resp = ''
     try:
@@ -61,11 +62,11 @@ def die():
     while (True):
         time.sleep(60)
         if time.strftime("%H:%M", time.localtime()) == '00:03':
-            get_weibo(uid,'每日任务')
+            get_weibo(uid,'日常')
             get_weibo(uid,'P1预估兑换树')
 # 手动刷新数据
 def shoudong():
-    get_weibo(uid,'每日任务')
+    get_weibo(uid,'日常')
     get_weibo(uid,'P1预估兑换树')
     return '数据刷新成功'
 
@@ -89,7 +90,7 @@ def get_containerid(url):
     return containerid
 # 获取json内容并保存
 def get_weibo(uid,specified):
-    botpaht = os.path.dirname(os.path.realpath(sys.argv[0])) + f'\\频道数据\\光遇缓存数据\\{specified}.json'
+    botpaht = PATH + f'\\频道数据\\光遇缓存数据\\{specified}.json'
     i=1
     while True:
         url='https://m.weibo.cn/api/container/getIndex?type=uid&value='+uid
@@ -119,12 +120,21 @@ def get_weibo(uid,specified):
                             resp = requests.get('https://m.weibo.cn/statuses/show?id=' + us).text
                             resp = json.loads(resp)
                             # return re.findall('status/(.*?)\?mblogid', scheme)[0]
+
+
                             with open(botpaht,'w',encoding='utf-8') as fh:
                                 json.dump(resp,fh,ensure_ascii=False)
                                 fh.close()
                                 return False
+
+
                         #     fh.write("----第"+str(i)+"页，第"+str(j)+"条微博----"+"\n")
-                        #     fh.write("微博地址："+str(scheme)+"\n"+"发布时间："+str(created_at)+"\n"+"微博内容："+text+"\n"+"点赞数："+str(attitudes_count)+"\n"+"评论数："+str(comments_count)+"\n"+"转发数："+str(reposts_count)+"\n")
+                        #     print("微博地址：" + str(scheme) + "\n" + "发布时间：" + str(
+                        #         created_at) + "\n" + "微博内容：" + text + "\n" + "点赞数：" + str(
+                        #         attitudes_count) + "\n" + "评论数：" + str(comments_count) + "\n" + "转发数：" + str(
+                        #         reposts_count) + "\n")
+
+                            # fh.write("微博地址："+str(scheme)+"\n"+"发布时间："+str(created_at)+"\n"+"微博内容："+text+"\n"+"点赞数："+str(attitudes_count)+"\n"+"评论数："+str(comments_count)+"\n"+"转发数："+str(reposts_count)+"\n")
                 i+=1
                 return True
             else:
@@ -159,7 +169,7 @@ def getContent(suffix,conten):
     return text +img + original
 
 def figure(name):
-    botpaht = os.path.dirname(os.path.realpath(sys.argv[0])) + f'\\images\\光遇\\光遇兑换图'
+    botpaht = PATH + f'\\images\\光遇\\光遇兑换图'
     jpglist = ''
     for filename in os.listdir(botpaht):
         jpglist += filename.replace('.jpg','兑换图') + '\n'
@@ -167,3 +177,6 @@ def figure(name):
         return CQcode.images(f'\\images\\光遇\\光遇兑换图\\{name}.jpg')
     else:
         return '\n当前兑换图未被收录，已收录兑换图有:\n' + jpglist
+
+# if __name__ == '__main__':
+#     get_weibo(uid,"日常")

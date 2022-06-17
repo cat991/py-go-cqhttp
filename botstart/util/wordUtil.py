@@ -1,10 +1,10 @@
-import os, json, sys, random
-from time import localtime, strftime
+import json
+from gocqhttpbot import PATH
 
 
 # 查询所有口令
 def queryAllPermiss(guild_id, channel_id):
-    botpath = os.path.dirname(os.path.realpath(sys.argv[0])) + f'\\权限\\{guild_id}.json'
+    botpath = PATH + f'\\权限\\{guild_id}.json'
     flag = False
     try:
         with open(botpath, 'r', encoding='utf-8') as f:
@@ -26,7 +26,7 @@ def queryAllPermiss(guild_id, channel_id):
 
 # 删除json节点
 def delete_Permiss(guild_id, channel_id):
-    botpath = os.path.dirname(os.path.realpath(sys.argv[0])) + f'\\权限\\{guild_id}.json'
+    botpath = PATH + f'\\权限\\{guild_id}.json'
     cont = 0
     with open(botpath, 'r', encoding='utf-8') as f:
         item_list = json.loads(f.read())
@@ -45,7 +45,7 @@ def delete_Permiss(guild_id, channel_id):
 # 添加权限频道
 def addPermiss(guild_id, channel_id):
     # 首先读取已有的json文件中的内容
-    botpath = os.path.dirname(os.path.realpath(sys.argv[0])) + f'\\权限\\{guild_id}.json'
+    botpath = PATH + f'\\权限\\{guild_id}.json'
     cont = 0
     try:
         with open(botpath, 'r', encoding='utf-8') as f:
@@ -74,7 +74,7 @@ def addPermiss(guild_id, channel_id):
 
 
 def ad(guild_id, channel_id):
-    botpath = os.path.dirname(os.path.realpath(sys.argv[0])) + f'\\权限\\{guild_id}.json'
+    botpath = PATH + f'\\权限\\{guild_id}.json'
     try:
         with open(botpath, 'r', encoding='utf-8') as f:
             item_list = json.loads(f.read())

@@ -1,7 +1,7 @@
 from gocqhttpbot.botstart.entity import GuildEntity
 from gocqhttpbot.botstart.util import SignUtil
 import os, sys, re, json, random
-
+from gocqhttpbot import PATH
 GatHerData = [{
     "gather_id": 0,
     "gather_name": "兔子福",
@@ -38,7 +38,7 @@ GatHerData = [{
 
 # 随机获取一个五福
 def getGatHer(guild_id, channel_id, user_id):
-    botpath = os.path.dirname(os.path.realpath(sys.argv[0])) + f'\\频道数据\\集福\\{guild_id}.json'
+    botpath = PATH + f'\\频道数据\\集福\\{guild_id}.json'
     # ran = random.random(1, len(GatHerData) - 1)
     get_id = get_number_by_pro()
     flag = False
@@ -91,7 +91,7 @@ def getGatHer(guild_id, channel_id, user_id):
 
 # 我的五福
 def selectHer(guild_id, channel_id, user_id, at_user):
-    botpath = os.path.dirname(os.path.realpath(sys.argv[0])) + f'\\频道数据\\集福\\{guild_id}.json'
+    botpath = PATH + f'\\频道数据\\集福\\{guild_id}.json'
     try:
         with open(botpath, "r", encoding="utf-8")as f:
             flist = json.loads(f.read())
@@ -109,7 +109,7 @@ def selectHer(guild_id, channel_id, user_id, at_user):
 
 # 合成
 def compound(guild_id, channel_id, user_id):
-    botpath = os.path.dirname(os.path.realpath(sys.argv[0])) + f'\\频道数据\\集福\\{guild_id}.json'
+    botpath = PATH + f'\\频道数据\\集福\\{guild_id}.json'
     wufu = 0
     with open(botpath, "r", encoding="utf-8")as f:
         flist = json.loads(f.read())
@@ -142,7 +142,7 @@ def compound(guild_id, channel_id, user_id):
 
 # 修改已有的五福
 def updateGatHer(guild_id, channel_id, user_id, gather_name):
-    botpath = os.path.dirname(os.path.realpath(sys.argv[0])) + f'\\频道数据\\集福\\{guild_id}.json'
+    botpath = PATH + f'\\频道数据\\集福\\{guild_id}.json'
     with open(botpath, "r", encoding="utf-8")as f:
         flist = json.loads(f.read())
         f.close()
@@ -161,7 +161,7 @@ def updateGatHer(guild_id, channel_id, user_id, gather_name):
 
 # 赠予五福
 def giveGatHer(guild_id, channel_id, user_id, at_user, atuser_id, gather_name):
-    botpath = os.path.dirname(os.path.realpath(sys.argv[0])) + f'\\频道数据\\集福\\{guild_id}.json'
+    botpath = PATH + f'\\频道数据\\集福\\{guild_id}.json'
     # 判断有没有这个福
     get_gather_id = ""
     for i in GatHerData:
@@ -221,7 +221,7 @@ def get_number_by_pro():
 
 # 判断用户是否拥有这个福
 def judge(guild_id, user_id, gather_name):
-    botpath = os.path.dirname(os.path.realpath(sys.argv[0])) + f'\\频道数据\\集福\\{guild_id}.json'
+    botpath = PATH + f'\\频道数据\\集福\\{guild_id}.json'
     get_gather_id = ""
     for i in GatHerData:
         if i["gather_name"] == gather_name:
@@ -256,8 +256,8 @@ def gamble(guild_id, channel_id, user_id, at_user):
 
 # 出售五福
 def sell(guild_id, channel_id, user_id, at_user, gather_name, number):
-    botpath = os.path.dirname(os.path.realpath(sys.argv[0])) + f'\\频道数据\\集福\\交易大厅\\{guild_id}.json'
-    botpath1 = os.path.dirname(os.path.realpath(sys.argv[0])) + f'\\频道数据\\集福\\{guild_id}.json'
+    botpath = PATH + f'\\频道数据\\集福\\交易大厅\\{guild_id}.json'
+    botpath1 = PATH + f'\\频道数据\\集福\\{guild_id}.json'
     sellcode = False
     get_gather_id = ""
     id = random.randrange(1000, 9999)
@@ -333,7 +333,7 @@ def sell(guild_id, channel_id, user_id, at_user, gather_name, number):
             GuildEntity.send_guild_channel_msg(guild_id, channel_id, at_user + '要先拥有这个福才能出售哦~~')
 #出售五福给系统
 def sellSys(guild_id, channel_id, user_id, gather_name):
-    botpath = os.path.dirname(os.path.realpath(sys.argv[0])) + f'\\频道数据\\集福\\{guild_id}.json'
+    botpath = PATH + f'\\频道数据\\集福\\{guild_id}.json'
     if judge(guild_id,user_id,gather_name):
         get_gather_id = ""
         number = 0
@@ -364,7 +364,7 @@ def sellSys(guild_id, channel_id, user_id, gather_name):
 
 # 购买五福
 def buy(guild_id, channel_id, user_id, at_user, message):
-    botpath = os.path.dirname(os.path.realpath(sys.argv[0])) + f'\\频道数据\\集福\\交易大厅\\{guild_id}.json'
+    botpath = PATH + f'\\频道数据\\集福\\交易大厅\\{guild_id}.json'
     code = True
     try:
         with open(botpath,'r',encoding='utf-8')as f:
@@ -393,7 +393,7 @@ def buy(guild_id, channel_id, user_id, at_user, message):
 
 # 交易大厅信息
 def trading(guild_id, channel_id, at_user, message=""):
-    botpath = os.path.dirname(os.path.realpath(sys.argv[0])) + f'\\频道数据\\集福\\交易大厅\\{guild_id}.json'
+    botpath = PATH + f'\\频道数据\\集福\\交易大厅\\{guild_id}.json'
     t = 0
     data = f'你搜索的是:{message}'
     try:
@@ -418,7 +418,7 @@ def trading(guild_id, channel_id, at_user, message=""):
 
 #添加五福获奖记录
 def addrecord(guild_id, user_id):
-    botpath = os.path.dirname(os.path.realpath(sys.argv[0])) + f'\\频道数据\\集福\\获奖记录\\{guild_id}.json'
+    botpath = PATH + f'\\频道数据\\集福\\获奖记录\\{guild_id}.json'
     try:
         with open(botpath, 'r', encoding='utf-8')as f:
             flist = json.loads(f.read())
@@ -441,7 +441,7 @@ def addrecord(guild_id, user_id):
             f3.close()
 #查看获奖记录
 def getrecord(guild_id, channel_id,at_user):
-    botpath = os.path.dirname(os.path.realpath(sys.argv[0])) + f'\\频道数据\\集福\\获奖记录\\{guild_id}.json'
+    botpath = PATH + f'\\频道数据\\集福\\获奖记录\\{guild_id}.json'
     data = '以下是已合成五福的获奖者：\n'
     try:
         with open(botpath,'r',encoding='utf-8')as f:
@@ -499,7 +499,7 @@ def gather(data):
 #
 #     id = random.randrange(100000,9999999)
 #     print(id)
-#     # botpath = os.path.dirname(os.path.realpath(sys.argv[0])) + f'\\频道数据\\集福\\312671636379380.json'
+#     # botpath = PATH + f'\\频道数据\\集福\\312671636379380.json'
 #     botpath = 'E:\\pythonProject\\test1\\频道数据\\集福\\312671636379380.json'
 #     with open(botpath, "r", encoding="UTF-8")as f:
 #         flist = json.loads(f.read())

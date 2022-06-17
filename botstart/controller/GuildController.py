@@ -1,9 +1,8 @@
 from gocqhttpbot.botstart.entity import GuildEntity, CQcode,xmlEntity
 from gocqhttpbot.botstart.impl import yuleImpl, wfImpl,hireImpl,guildImpl,blind_box,skyImpl,animeImpl
 from gocqhttpbot.botstart.util import SignUtil, wordUtil,memeImgGenerate,permissions,init
-import json, re,os,sys
-
-
+import json, re,os,sys,random
+from gocqhttpbot import log
 def guildController(data):
     data = json.loads(data)
     message = data['message']  # 消息
@@ -12,6 +11,8 @@ def guildController(data):
     user_id = str(data['user_id'])  # 触发用户id
     at_user = f'[CQ:at,qq={user_id}] '
     nickname = data['sender']['nickname']
+    log.info(f'收到来自频道的用户 {nickname} 说 { message if len(message)<20 else message[:20] + "..."}')
+
     #这是二次元老婆对话
     anime = animeImpl.anime(message)
     if anime:
@@ -55,7 +56,7 @@ def guildController(data):
         #这是战甲攻略
         strategy = wfImpl.strategy(message)
         if strategy:
-            GuildEntity.send_guild_channel_msg(guild_id, channel_id, at_user + strategy + '\n有问题请联系管理 何患')
+            GuildEntity.send_guild_channel_msg(guild_id, channel_id, at_user + strategy + ('如攻略有问题，请联系管理 何患' if random.randint(1,6) == 5  else '') )
 
     #这是口令内容
     for j in pass_list(pass_path):
@@ -80,6 +81,8 @@ def guildController(data):
     elif message[:4] == 'ping':
         GuildEntity.send_guild_channel_msg(guild_id, channel_id,
                                            at_user + yuleImpl.ping(message[4:]))
+    elif message == '疯狂星期四':
+        GuildEntity.send_guild_channel_msg(guild_id,channel_id,animeImpl.crazy())
     # elif message == '污段子':
     #     guildentity.send_guild_channel_msg(guild_id, channel_id,at_user + yuleimpl.wuduanzi())
     elif message[:2].lower() == 'rm' or message[:2].lower() == 'zk':
@@ -179,7 +182,7 @@ def guildController(data):
     elif '复刻' == message or '复刻先祖' == message:
         GuildEntity.send_guild_channel_msg(guild_id, channel_id, at_user + skyImpl.task('P1预估兑换树'))
     elif '每日' == message or '每日任务' == message:
-        GuildEntity.send_guild_channel_msg(guild_id, channel_id, at_user + skyImpl.task('每日任务'))
+        GuildEntity.send_guild_channel_msg(guild_id, channel_id, at_user + skyImpl.task('日常'))
     elif message == '更新缓存' and (user_id == str(init.CONFIG.masterId) or permissions.getPermissions(user_id)):
         GuildEntity.send_guild_channel_msg(guild_id, channel_id, at_user + skyImpl.shoudong())
     elif '兑换图' in message:

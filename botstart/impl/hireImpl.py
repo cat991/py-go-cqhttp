@@ -4,6 +4,7 @@ from gocqhttpbot.botstart.entity import GuildEntity, CQcode,GroupEntity
 from gocqhttpbot.botstart.util import textToImg, SignUtil
 import json, time, os, sys, random
 
+from gocqhttpbot import PATH
 hireTypes = [{
     'name': '打工',
     'nickname': '恭喜兔宝雇佣成功·对方正在为您在工厂打工赚萝卜（16分钟后结算）',
@@ -49,7 +50,7 @@ hireTypes = [{
 
 # 遍历查询所有内容
 def monitoring():
-    botpath = os.path.dirname(os.path.realpath(sys.argv[0])) + f'\\频道数据\\雇佣数据'
+    botpath = PATH + f'\\频道数据\\雇佣数据'
     listFile = os.listdir(botpath)
     times = time.time()
     for guil_id in listFile:
@@ -113,7 +114,7 @@ def monitoring():
 # 结算删除信息
 def deletHire(guild_id, hire):
 
-    bypath = os.path.dirname(os.path.realpath(sys.argv[0])) + f'\\频道数据\\雇佣数据\\{guild_id}.json'
+    bypath = PATH + f'\\频道数据\\雇佣数据\\{guild_id}.json'
     cont = 0
     with open(bypath, 'r', encoding='utf-8') as f:
         item_list = json.loads(f.read())
@@ -142,7 +143,7 @@ def addHire(guild_id, channel_id, user_id, at_qq, hireType):
         conts += 1
         if typeof['name'] == hireType:
             flag = False
-            bypath = os.path.dirname(os.path.realpath(sys.argv[0])) + f'\\频道数据\\雇佣数据\\{str(guild_id)}.json'
+            bypath = PATH + f'\\频道数据\\雇佣数据\\{str(guild_id)}.json'
             try:
                 with open(bypath, 'r', encoding='utf-8') as f:
                     data = json.loads(f.read())
@@ -206,7 +207,7 @@ def addHire_group(group_id, user_id, at_qq, hireType):
         conts += 1
         if typeof['name'] == hireType:
             flag = False
-            bypath = os.path.dirname(os.path.realpath(sys.argv[0])) + f'\\频道数据\\雇佣数据\\{str(group_id)}.json'
+            bypath = PATH + f'\\频道数据\\雇佣数据\\{str(group_id)}.json'
             try:
                 with open(bypath, 'r', encoding='utf-8') as f:
                     data = json.loads(f.read())
@@ -262,7 +263,7 @@ def die():
 
 
 def functionss(guild_id, channel_id, user_id, at_user, message):
-    botpath = os.path.dirname(os.path.realpath(sys.argv[0])) + f'\\频道数据\\雇佣菜单.json'
+    botpath = PATH + f'\\频道数据\\雇佣菜单.json'
     if message[:6] == '修改雇佣功能' and user_id == '144115218676755577':
         with open(botpath, 'w', encoding='utf-8')as f:
             f.write(message[6:])
@@ -283,7 +284,7 @@ def functionss(guild_id, channel_id, user_id, at_user, message):
 
 
 def userHire(guild_id, channel_id, user_id):
-    bypath = os.path.dirname(os.path.realpath(sys.argv[0])) + f'\\频道数据\\雇佣数据\\{guild_id}.json'
+    bypath = PATH + f'\\频道数据\\雇佣数据\\{guild_id}.json'
     at_user = f'[CQ:at,qq={user_id}]'
     hire_content = '你的雇佣信息如下:\n'
     with open(bypath, 'r', encoding='utf-8') as f:
@@ -297,7 +298,7 @@ def userHire(guild_id, channel_id, user_id):
     return GuildEntity.send_guild_channel_msg(guild_id, channel_id, at_user + hire_content)
 
 def userHire_group(group_id, user_id):
-    bypath = os.path.dirname(os.path.realpath(sys.argv[0])) + f'\\频道数据\\雇佣数据\\{group_id}.json'
+    bypath = PATH + f'\\频道数据\\雇佣数据\\{group_id}.json'
     at_user = f'[CQ:at,qq={user_id}]'
     hire_content = '你的雇佣信息如下:\n'
     with open(bypath, 'r', encoding='utf-8') as f:

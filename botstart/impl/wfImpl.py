@@ -3,6 +3,7 @@ import requests
 from gocqhttpbot.botstart.impl import otherImpl
 from gocqhttpbot.botstart.entity import GroupEntity
 
+from gocqhttpbot import PATH
 import os, sys
 
 headers = {
@@ -232,7 +233,7 @@ def wfwm(msg, mod_rank):
 
 # 翻译&warframe查字典
 def botci(keys, flag=True):
-    path = os.path.dirname(os.path.realpath(sys.argv[0])) + "\\WF_Sale.json"
+    path = PATH + "\\WF_Sale.json"
     # if any(str in keys for str in ['蓝', '头', '机', '体','系统','场景','枪','前纪','古纪','后纪','中纪','装饰']) and flag:
     try:
         with open(path, "r", encoding="utf-8") as f:
@@ -401,7 +402,7 @@ def warframe():
     """
 
 def strategy(txt):
-    onePath = os.path.dirname(os.path.realpath(sys.argv[0])) + f'\\频道数据\\星际战甲攻略数据'
+    onePath = PATH + f'\\频道数据\\星际战甲攻略数据'
     # onePath = f'..\\..\\..\\频道数据\\星际战甲攻略数据'
     pathName = ''
     for filename in os.listdir(onePath):
@@ -420,4 +421,4 @@ def strategy(txt):
         content = content.replace(f'[{finImg}]', f'[CQ:image,file=file:///{pathNew}/{finImg}]')
     return content
 
-    # path = os.path.dirname(os.path.realpath(sys.argv[0])) + "\\WF_Sale.json"
+    # path = PATH + "\\WF_Sale.json"

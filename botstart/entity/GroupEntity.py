@@ -1,5 +1,5 @@
 import win32api,win32con,os,sys
-import requests,json
+import requests,json,random
 from gocqhttpbot.botstart.util import permissions,init
 configs={
     'url':"http://127.0.0.1:5700",
@@ -15,14 +15,14 @@ def get_desktop():
 
 
 #发送群消息
-def send_group_msg(group_id,message):
+def send_group_msg(group_id,message,flag = True):
     url = configs.get('url') + '/send_group_msg'
 
     data = {
         'group_id':group_id,
-        'message':  message,
+        'message':  message + ('\n机器人是免费的,如果你喜欢的话可以点击链接赞助作者哦~\n地址:https://dun.mianbaoduo.com/@heimao' if random.randint(1,10) == 5  else '')
     }
-    if init.CONFIG.msgDelet:
+    if init.CONFIG.msgDelet and flag:
         permissions.add_msg_id(requests.post(url, data).text)
     else:
         requests.post(url,data)
@@ -68,7 +68,7 @@ def set_friend_add_request(flag,remark=''):
         'approve' : True,#默认同意
         'remark':remark #好友备注，默认空
     }
-    print(requests.post(url, data))
+    requests.post(url, data)
 
 #处理加群请求或邀请
 def set_group_add_request(flag,type,reason=''):
@@ -80,7 +80,7 @@ def set_group_add_request(flag,type,reason=''):
         'approve':True, #默认同意邀请
         'reason':reason#拒绝的理由
     }
-    print(requests.post(url, data).text)
+    requests.post(url, data)
 
 #上传群图片
 def uploadgrouppic(path):
