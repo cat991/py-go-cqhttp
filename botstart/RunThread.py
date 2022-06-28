@@ -19,7 +19,7 @@ startTiem = time.time()
 
 # 清空命令行
 def clear():
-    if configs['textcont'] == 30:
+    if configs['textcont'] == 50:
         os.system('cls')
         configs['textcont'] = 0
     else:
@@ -126,7 +126,7 @@ class del_msg_monitor(threading.Thread):
         except Exception as result:
             print('消息撤回监视器出错%s' % result)
             time.sleep(5)
-            permissions.msg_monitor()
+            del_msg_monitor.start(self)
 
 
 

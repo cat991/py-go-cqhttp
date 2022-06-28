@@ -45,7 +45,7 @@ def task(specified):
         getImgs = resp['data']['pics']
         # print(getImgs)
         for i in getImgs:
-            if cont < 3 :
+            if cont < 4 :
                 imagesCQ += CQcode.images(i['large']['url'])
             cont += 1
 

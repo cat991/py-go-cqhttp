@@ -160,45 +160,85 @@ def auth(group_id, auth_code):
     auth_path = PATH + f'\\data\\config\\group\\code.json'
     path = PATH + f'\\data\\config\\group\\authdb.json'
     with open(auth_path, 'r', encoding='utf-8')as f:
-        if auth_code == f.read():
+        auth_json = json.loads(f.read())
+        flag = False
+        endTime = 0
+        count = 0
+        for i in auth_json:
+            if auth_code == i["code"]:
+                flag = True
+                endTime = i["time"]
+                del auth_json[count]
+                break
+            count += 1
+        if flag:
             f.close()
-            auth_db = ''
             if not os.path.exists(path):
-                auth_db = [group_id]
+                auth_db = [{
+                    "group_id":group_id,
+                    "time" : endTime
+                }]
             else:
                 with open(path, 'r', encoding='utf-8')as f3:
                     auth_db = json.loads(f3.read())
-                    auth_db.append(group_id)
+                    data = {
+                        "group_id": group_id,
+                        "time": endTime
+                    }
+                    auth_db.append(data)
                     f3.close()
             with open(path, 'w', encoding='utf-8')as f2:
                 json.dump(auth_db, f2, ensure_ascii=False)
                 f2.close()
-                get_auth_code()
-                return '群授权成功，开启萝卜功能'
+            with open(auth_path, 'w', encoding='utf-8')as f2:
+                json.dump(auth_json, f2, ensure_ascii=False)
+                f2.close()
+                return '群授权成功，开启萝卜功能 ,到期时间'+time.strftime("%Y年%m月%d日",time.localtime(endTime))
         else:
             return '授权失败,不存在的授权信息'
 
 
 # 获取授权码
-def get_auth_code():
+def get_auth_code(day:int):
     path = PATH + f'\\data\\config\\group\\code.json'
-    code = uuid.uuid4()
-    with open(path, 'w', encoding='utf-8') as f:
-        # json.dump(code, f, ensure_ascii=False)
-        f.write(str(code))
-        f.close()
-    return str(code)
+    code = str(uuid.uuid4())
+    if os.path.exists(path):
+        with open(path, 'r', encoding='utf-8') as f:
+            # json.dump(code, f, ensure_ascii=False)
+            datas = json.loads(f.read())
+            if type(datas) == list:
+                data = {
+                    "code": code,
+                    "time": time.time() + day * 60 * 60 * 24
+                }
+                datas.append(data)
+            else:
+                datas = [{
+                    "code": code,
+                    "time": time.time() + day * 60 * 60 * 24
+                }]
+            f.close()
+    else:
+        datas = [{
+            "code": code,
+            "time": time.time() + day * 60 * 60 * 24
+        }]
+    with open(path, "w", encoding="utf-8")as f1:
+        json.dump(datas, f1, ensure_ascii=False)
+        f1.close()
+    return code
 
 
 # 取消群授权
 def delAuth(group_id):
     path = PATH + f'\\data\\config\\group\\authdb.json'
     with open(path, 'r', encoding='utf-8')as f:
-        ls = list(json.loads(f.read()))
+        ls = json.loads(f.read())
         f.close()
         cont = 0
         for i in ls:
-            if group_id == i:
+            print((int(group_id) == i["group_id"]))
+            if int(group_id) == i["group_id"]:
                 del ls[cont]
                 with open(path, 'w', encoding='utf-8')as f2:
                     json.dump(ls, f2, ensure_ascii=False)
@@ -217,7 +257,7 @@ def get_auth(group_id) -> bool:
             data = json.loads(f.read())
             f.close()
     for i in data:
-        if group_id == i:
+        if group_id == i["group_id"] and time.time() < i["time"]:
             return True
     return False
 # if __name__ == '__main__':

@@ -43,7 +43,7 @@ def heimao(specified):
         # 图片内容
         getImgs = resp['data']['pics']
         for i in getImgs:
-            if cont < 3:
+            if cont < 4:
                 images.append(i['large']['url'])
             cont+=1
         return json.dumps({

@@ -1,7 +1,7 @@
 from gocqhttpbot.botstart.entity import GroupEntity, CQcode, xmlEntity
 from gocqhttpbot.botstart.impl import wfImpl, skyImpl, guildImpl, animeImpl, hireImpl
 import json, re, os, sys,random
-
+from gocqhttpbot import PATH
 # 发送群消息
 from gocqhttpbot.botstart.util import memeImgGenerate, SignUtil,permissions,init
 from gocqhttpbot import log
@@ -15,7 +15,7 @@ def groupController(data):
     self_id = str(data['self_id'])  # 框架qq号
     group_id = data['group_id']  # 群号
     raw_message = data['raw_message']  # 原始消息内容
-    message = data['message']  # 消息内容
+    message = data['message'] # 消息内容
     user_id = str(data['user_id'])  # 触发用户id
     at_id = f'[CQ:at,qq={user_id}]'
     nickname = data['sender']['nickname']
@@ -31,6 +31,7 @@ def groupController(data):
     for i in pass_list('默认指令'):
         if message == i['instruction']:
             GroupEntity.send_group_msg(group_id, at_id + i['content'])
+
 
     # ————————————————————————————————————种萝卜签到功能，需授权----------------
     if permissions.get_auth(group_id):
@@ -60,17 +61,17 @@ def groupController(data):
                 GroupEntity.send_group_msg(group_id, at_id + '没写数量？')
         elif '雇佣' in message:
             hireImpl.hire_group(json.dumps(data))
-    elif message[:2] == '授权':
+    elif message[:2] == '授权' and len(message) > 10 and not message == "授权功能":
         GroupEntity.send_group_msg(group_id, at_id + permissions.auth(group_id, message[2:]))
 
 
-    if message == '测试':
-        pass
+    if message == '食莞' or message == "投喂":
+        GroupEntity.send_group_msg(group_id,"好感度 +10 ...")
         # GroupEntity.send_group_msg(group_id, GroupEntity.can_send_record())
         # GroupEntity.send_group_msg(group_id,animeImpl.crazy())
      #-----授权功能-------------------------------------------------------
-    elif message == '获取授权码' and user_id == str(init.CONFIG.master):
-        GroupEntity.send_group_msg(group_id, at_id + permissions.get_auth_code())
+    elif message[:5] == '获取授权码' and user_id == str(init.CONFIG.master):
+        GroupEntity.send_group_msg(group_id, at_id + permissions.get_auth_code(int(message[5:])))
     elif message == '取消授权' and user_id == str(init.CONFIG.master):
         GroupEntity.send_group_msg(group_id,permissions.delAuth(group_id))
     elif any(str == message for str in ['射爆', '抽奖','左轮枪游戏','开枪']) and not SignUtil.judge(str(group_id),user_id):
@@ -80,7 +81,7 @@ def groupController(data):
         if not SignUtil.get_user_radish_number(str(group_id), user_id, 2):
             return GroupEntity.send_group_msg(group_id,'你已经没有足够的萝卜来玩游戏了')
         if random.randint(0, 2) == 1:
-            if GroupEntity.set_group_ban(group_id,user_id,random.randint(3,10)):
+            if GroupEntity.set_group_ban(group_id,user_id,random.randint(5,10)):
                 add = random.randint(10,20)
                 GroupEntity.send_group_msg(group_id, f'成功射爆！！获得{str(add)}根萝卜！')
                 SignUtil.updataradish(str(group_id),add,user_id,0,0,0,)
@@ -146,7 +147,7 @@ def groupController(data):
     #         GroupEntity.send_group_msg(group_id, at_id + CQcode.images('images\\光遇\\菜单.JPG'))
     #     else:
     #         GroupEntity.send_group_msg(group_id, at_id + wfImpl.warframe())
-    elif ('菜单' in message or  '功能' in message) and len(message) < 6:
+    elif ('菜单' in message or  '功能' in message) and len(message) < 6 and not message == "授权功能":
         if message == '光遇菜单' or message == '光遇功能':
             GroupEntity.send_group_msg(group_id, at_id + CQcode.images('images\\光遇\\菜单.JPG'))
         elif message == '战甲菜单' or message == '战甲功能':
@@ -209,7 +210,7 @@ def groupController(data):
         GroupEntity.send_group_msg(group_id, at_id + skyImpl.task('日常'),False)
     elif message == '更新缓存' and user_id == str(init.CONFIG.master):
         GroupEntity.send_group_msg(group_id, at_id + skyImpl.shoudong())
-    elif '兑换图' in message:
+    elif '兑换图' in message and len(message) < 8:
         GroupEntity.send_group_msg(group_id, at_id + skyImpl.figure(message.replace('兑换图', '')))
     elif message[:2] == '发单':
         if role == 'owner' or role == 'admin' or user_id == str(init.CONFIG.master):
@@ -229,7 +230,7 @@ def groupController(data):
 
 # 获取指令内容
 def pass_list(path):
-    botpath = os.path.dirname(os.path.realpath(sys.argv[0])) + f'\\频道数据\\指令\\{path}.json'
+    botpath = PATH + f'\\频道数据\\指令\\{path}.json'
     try:
         with open(botpath, 'r', encoding='utf-8') as f:
             item_list = json.loads(f.read())

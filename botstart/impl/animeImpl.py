@@ -12,6 +12,15 @@ def anime(txt):
             return res[str(txt)][random.randint(0,len(res[str(txt)])-1)]
         else:
             return False
+def caidan(txt):
+    path = PATH + f'\\data\\菜单.json'
+    with open(path,'r',encoding='utf-8')as f:
+        res = json.loads(f.read())
+        f.close()
+        if txt in res:
+            return res[str(txt)][random.randint(0,len(res[str(txt)])-1)]
+        else:
+            return False
 def dinggong():
     # onePath = os.path.dirname(os.path.realpath(sys.argv[0])) + f'\\data\\dinggong'
     onePath = PATH + f'\\data\\dinggong'

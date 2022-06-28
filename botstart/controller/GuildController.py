@@ -185,7 +185,7 @@ def guildController(data):
         GuildEntity.send_guild_channel_msg(guild_id, channel_id, at_user + skyImpl.task('日常'))
     elif message == '更新缓存' and (user_id == str(init.CONFIG.masterId) or permissions.getPermissions(user_id)):
         GuildEntity.send_guild_channel_msg(guild_id, channel_id, at_user + skyImpl.shoudong())
-    elif '兑换图' in message:
+    elif '兑换图' in message and len(message) < 8:
         GuildEntity.send_guild_channel_msg(guild_id, channel_id, at_user + skyImpl.figure(message.replace('兑换图', '')))
 
     # 萝卜丁功能

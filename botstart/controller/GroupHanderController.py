@@ -19,7 +19,8 @@ def groupHanderController(data):
     if request_type == 'friend':
         # 自动同意添加好友
         GroupEntity.set_friend_add_request(flag)
-    elif request_type == 'group' and (user_id == str(init.CONFIG.master) or user_id == '2460182177') and data['sub_type'] == 'invite':
+    # elif request_type == 'group' and (user_id == str(init.CONFIG.master) or user_id == '2460182177') and data['sub_type'] == 'invite':
+    elif request_type == 'group' and user_id == str(init.CONFIG.master) and data['sub_type'] == 'invite':
         # 自动同意加群
         GroupEntity.set_group_add_request(flag,data['sub_type'])
     elif data['sub_type'] == 'add':
