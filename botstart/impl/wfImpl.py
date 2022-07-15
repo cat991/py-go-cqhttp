@@ -28,7 +28,16 @@ def arbitration():
 
 # 基于https://github.com/WsureDev/warframe-info-api接口开发的通用接口
 def allOutmsg(msg):
-    return '\t\n' + requests.get('http://nymph.rbq.life:3000/wf/robot/' + msg).text
+    resp = requests.get('https://api.null00.com/world/ZHCN')
+    resp = json.loads(resp.text)['invasions']
+    ret = ""
+    for i in resp:
+        ret += f"{i['node']}（{i['locTag']}）\n{i['attacker']['faction']}vs{i['defender']['faction']}"
+        if len(i['attacker']['rewards']) == 0:
+            ret += f"\n没有奖励 vs{i['defender']['rewards'][0]['item']}\n\n"
+        else:
+            ret += f"\n{i['attacker']['rewards'][0]['item']}vs{i['defender']['rewards'][0]['item']}\n\n"
+    return  otherImpl.toImage("国服入侵\t\n"+ret,"国服入侵")+otherImpl.toImage("国际服入侵\t\n"+requests.get('http://nymph.rbq.life:3000/wf/robot/' + msg).text,"国际服入侵")
 
 
 # 突击信息

@@ -23,22 +23,26 @@ def task(specified):
             resp = json.loads(f.read())
             f.close()
             # print(resp)
-        content = re.findall('</span></a>(.*?)<a href=', resp['data']['text'])[0]
-        content = content.replace('<br />', '\n')
-        if '<a' in content:
-            ls1 = re.findall('<a(.*?)>', content)
-            for i in ls1:
-                content = content.replace(i, '').replace('<a>', '').replace('</a>', '')
-
-        if '<img' in content:
-            ls2 = re.findall('<img(.*?)>', content)
-            for i in ls2:
-                content = content.replace(i, '').replace('<img>', '')
-
-        if '<span' in content:
-            ls3 = re.findall('<span(.*?)>', content)
-            for i in ls3:
-                content = content.replace(i, '').replace('<span>', '').replace('</span>', '')
+        content = re.sub(r'<[^>]+>',"",resp['data']['text'],re.S)
+        content = content.replace("<br />",'\n')
+        content = content[:content.find("网易云游戏")]
+        # content = re.findall('</span></a>(.*?)<a href=', resp['data']['text'])[0]
+        #
+        # content = content.replace('<br />', '\n')
+        # if '<a' in content:
+        #     ls1 = re.findall('<a(.*?)>', content)
+        #     for i in ls1:
+        #         content = content.replace(i, '').replace('<a>', '').replace('</a>', '')
+        #
+        # if '<img' in content:
+        #     ls2 = re.findall('<img(.*?)>', content)
+        #     for i in ls2:
+        #         content = content.replace(i, '').replace('<img>', '')
+        #
+        # if '<span' in content:
+        #     ls3 = re.findall('<span(.*?)>', content)
+        #     for i in ls3:
+        #         content = content.replace(i, '').replace('<span>', '').replace('</span>', '')
 
         cont = 0
         # 图片内容
@@ -61,9 +65,10 @@ def task(specified):
 def die():
     while (True):
         time.sleep(60)
-        if time.strftime("%H:%M", time.localtime()) == '00:03':
+        if any(time.strftime("%H:%M", time.localtime()) == str for str in ['00:03', '00:10','12:05']):
             get_weibo(uid,'日常')
             get_weibo(uid,'P1预估兑换树')
+
 # 手动刷新数据
 def shoudong():
     get_weibo(uid,'日常')
@@ -121,7 +126,7 @@ def get_weibo(uid,specified):
                             resp = json.loads(resp)
                             # return re.findall('status/(.*?)\?mblogid', scheme)[0]
 
-
+                            # return resp
                             with open(botpaht,'w',encoding='utf-8') as fh:
                                 json.dump(resp,fh,ensure_ascii=False)
                                 fh.close()
@@ -179,4 +184,6 @@ def figure(name):
         return '\n当前兑换图未被收录，已收录兑换图有:\n' + jpglist
 
 # if __name__ == '__main__':
-#     get_weibo(uid,"日常")
+    # content  = re.sub(r'<[^>]+>',"",get_weibo(uid, "日常")['data']['text'],re.S)
+    # print(content[:content.find("网易云游戏")])
+    # print(re.compile(r'<[^>]+>', get_weibo(uid, "日常")['data']['text']))

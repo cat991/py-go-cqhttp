@@ -22,22 +22,24 @@ def heimao(specified):
         content = re.findall('</span></a>(.*?)<a href=', resp['data']['text'])[0]
 
         content = content.replace('<br />', '\n')
-        if '<a' in content:
-            ls1 = re.findall('<a(.*?)>', content)
-            for i in ls1:
-                content = content.replace(i, '').replace('<a>', '').replace('</a>', '')
-
-        if '<img' in content:
-            ls2 = re.findall('<img(.*?)>', content)
-            for i in ls2:
-                content = content.replace(i, '').replace('<img>', '')
-
-        if '<span' in content:
-            ls3 = re.findall('<span(.*?)>', content)
-            for i in ls3:
-                content = content.replace(i, '').replace('<span>', '').replace('</span>', '')
-        if '每日任务' in content:
-            content = content[content.find('----------------【每日任务】'):]
+        content = content[:content.find("网易云游戏")]
+        # content = content[:content.find()]
+        # if '<a' in content:
+        #     ls1 = re.findall('<a(.*?)>', content)
+        #     for i in ls1:
+        #         content = content.replace(i, '').replace('<a>', '').replace('</a>', '')
+        #
+        # if '<img' in content:
+        #     ls2 = re.findall('<img(.*?)>', content)
+        #     for i in ls2:
+        #         content = content.replace(i, '').replace('<img>', '')
+        #
+        # if '<span' in content:
+        #     ls3 = re.findall('<span(.*?)>', content)
+        #     for i in ls3:
+        #         content = content.replace(i, '').replace('<span>', '').replace('</span>', '')
+        # if '每日任务' in content:
+        #     content = content[content.find('----------------【每日任务】'):]
 
         cont=0
         # 图片内容

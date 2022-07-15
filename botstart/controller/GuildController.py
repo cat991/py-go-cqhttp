@@ -13,10 +13,6 @@ def guildController(data):
     nickname = data['sender']['nickname']
     log.info(f'收到来自频道的用户 {nickname} 说 { message if len(message)<20 else message[:20] + "..."}')
 
-    #这是二次元老婆对话
-    anime = animeImpl.anime(message)
-    if anime:
-        GuildEntity.send_guild_channel_msg(guild_id, channel_id, anime)
 
 
     pass_path = '默认指令'
@@ -51,6 +47,11 @@ def guildController(data):
     # 这是屏蔽功能
     if wordUtil.queryAllPermiss(guild_id, channel_id):
         return ''
+    #这是二次元老婆对话
+    anime = animeImpl.anime(message)
+    if anime:
+        GuildEntity.send_guild_channel_msg(guild_id, channel_id, anime)
+
     #避免打扰到其他非战甲频道
     if guildImpl.get_guil_name(guild_id, '战甲') or guildImpl.get_guil_name(guild_id, 'warframe'):
         #这是战甲攻略
