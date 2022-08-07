@@ -1,6 +1,8 @@
 import win32api,win32con,os,sys
 import requests,json,random
 from gocqhttpbot.botstart.util import permissions,init
+from gocqhttpbot.botstart.entity import CQcode
+from gocqhttpbot.botstart.impl import otherImpl
 configs={
     'url':"http://127.0.0.1:5700",
     'textcont': 0
@@ -12,15 +14,15 @@ def get_desktop():
     return win32api.RegQueryValueEx(key,'Desktop')[0]
 
 
-
-
 #发送群消息
-def send_group_msg(group_id,message,flag = True):
+def send_group_msg(group_id,message,flag = True,fengkong= False):
     url = configs.get('url') + '/send_group_msg'
-
+    if fengkong :
+        message = otherImpl.toImage(message,"临时风控处理")
     data = {
         'group_id':group_id,
-        'message':  message + ('\n机器人是免费的,如果你喜欢的话可以点击链接赞助作者哦~\n地址:https://dun.mianbaoduo.com/@heimao' if random.randint(1,10) == 5  else '')
+        # 'message':  message + ('\n机器人是免费的,如果你喜欢的话可以点击链接赞助作者哦~\n地址:https://dun.mianbaoduo.com/@heimao' if random.randint(1,10) == 5  else '')
+        'message': message
     }
     if init.CONFIG.msgDelet and flag:
         permissions.add_msg_id(requests.post(url, data).text)

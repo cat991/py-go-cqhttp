@@ -100,7 +100,7 @@ def guildController(data):
             GuildEntity.send_guild_channel_msg(guild_id, channel_id, at_user + '正在进行昼夜更替，稍后查询哦')
     elif message == '仲裁' or message == '仲裁任务':
         GuildEntity.send_guild_channel_msg(guild_id, channel_id, at_user + wfImpl.arbitration())
-    elif message == '中继站轮换' or message == '泰森':
+    elif message == '中继站轮换' or message == '泰辛':
         GuildEntity.send_guild_channel_msg(guild_id, channel_id, at_user + wfImpl.steelPath())
     elif message[:4].lower() == 'wiki':
         message = message[4:].replace(" ", "")

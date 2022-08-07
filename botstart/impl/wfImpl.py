@@ -203,12 +203,15 @@ def wfwm(msg, mod_rank):
     resp = requests.get(
         f'https://api.warframe.market/v1/items/{str["itme"].replace(" ", "_").lower()}/orders?include=item')
     resp = json.loads(resp.text)
+
     try:
         orderslist = resp['payload']['orders']
         orderslist = sorted(orderslist, key=lambda x: x["platinum"], reverse=False)
 
         orderre = f'\t\n默认展示价格最低前10个\n你要搜索的是：{msg["main"]} \n翻译：{msg["zh"]}'
+
     except:
+
         return '\t\n搜索出现了一点小状况,检查是否错别字或重新查询'
     cont = 0  # 统计10个
     number = 0  # 统计全部价格
@@ -232,8 +235,8 @@ def wfwm(msg, mod_rank):
                 name = i['user']['ingame_name']  # 获取到的游戏名
                 state = i['user']['status']
                 orderre += f' \n白金:{baijin}--游戏id: {name}--物品等级:{str["mod_rank"]}级'
-            # orderre += f'\n在线状态：{"在线" if state != "offline" else "离线"}\n白金:{baijin}---游戏昵称: {name}'
-
+                # orderre += f'\n在线状态：{"在线" if state != "offline" else "离线"}\n白金:{baijin}---游戏昵称: {name}'
+    # print(orderre)
     if cont == 0:
         return '\t\n没有该商品或并没有查到该等级的商品'
     else:
@@ -251,7 +254,7 @@ def botci(keys, flag=True):
         # keys = input("战甲")
         if flag:
             keys += "一套"
-        print(keys)
+        # print(keys)
         result = fuzzy_finder(keys, file_list)
         if len(result) == 0 and flag:
             return botci(keys.replace('一套', ''), False)
@@ -383,31 +386,32 @@ def search_relics(search, flg=False):
 # 星际战甲菜单
 def caidan():
     return """
-    ----当前菜单----
-    光遇菜单 | 战甲菜单
-    授权功能 | 赞助作者
+----当前菜单----
+光遇菜单 | 战甲菜单
+授权功能 | 赞助作者
+购买授权联系：q2996964572
     """
 
 def warframe():
     return """
-        \t你要的菜单来了
-        -----菜单-----
-        \t攻略  关键词
-        \twiki  关键词 
-        \t物品交易: wm  
-        \t紫卡交易：rm & zk 
-        \t平原时间 & 地球时间 
-        \t金星温度 
-        \t火卫二 & hw2 
-        \t虚空商人 & 奸商  
-        \t双服突击 
-        \t仲裁 & 仲裁任务 
-        \t查询口令
-        \t遗物 关键词(仅支持国服) 
-        \t中继站轮换 & 泰森
-        \t---频道主命令---
-        \t屏蔽 & 关闭
-        \t接触屏蔽 & 开启
+你要的菜单来了
+-----菜单-----
+攻略  关键词
+wiki  关键词 
+物品交易: wm  
+紫卡交易：rm & zk 
+平原时间 & 地球时间 
+金星温度 
+火卫二 & hw2 
+虚空商人 & 奸商  
+双服突击 
+仲裁 & 仲裁任务 
+查询口令
+遗物 关键词(仅支持国服) 
+中继站轮换 & 泰辛
+---频道主命令---
+屏蔽 & 关闭
+接触屏蔽 & 开启
     """
 
 def strategy(txt):

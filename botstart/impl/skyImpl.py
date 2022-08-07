@@ -3,7 +3,8 @@ from gocqhttpbot.botstart.entity import CQcode
 from gocqhttpbot.botstart.impl import otherImpl
 import urllib.request
 import json,os,sys,time
-from gocqhttpbot import PATH
+from gocqhttpbot import PATH,log
+
 #定义要爬取的微博大V的微博ID
 uid='7360748659'
 
@@ -14,6 +15,7 @@ proxy_addr="122.241.72.191:808"
 def task(specified):
     imagesCQ = ''
     botpath = PATH + f'\\频道数据\\光遇缓存数据\\{specified}.json'
+    # botpath = f'E:\pythonProject\\test1\频道数据\光遇缓存数据\日常.json'
     # resp = requests.get('https://m.weibo.cn/statuses/show?id=' + get_weibo(uid)).text
     resp = ''
     try:
@@ -23,9 +25,12 @@ def task(specified):
             resp = json.loads(f.read())
             f.close()
             # print(resp)
-        content = re.sub(r'<[^>]+>',"",resp['data']['text'],re.S)
-        content = content.replace("<br />",'\n')
-        content = content[:content.find("网易云游戏")]
+        content = resp['data']['text'].replace("<br />", '\n')
+        content = re.sub(r'<[^>]+>', "", content, re.S)
+        # content = re.sub(r'<[^>]+>',"",resp['data']['text'],re.S)
+        # content = content.replace("<br />",'\n')
+        content = content[content.find("======"):content.find("网易云游戏")]
+
         # content = re.findall('</span></a>(.*?)<a href=', resp['data']['text'])[0]
         #
         # content = content.replace('<br />', '\n')
@@ -43,7 +48,6 @@ def task(specified):
         #     ls3 = re.findall('<span(.*?)>', content)
         #     for i in ls3:
         #         content = content.replace(i, '').replace('<span>', '').replace('</span>', '')
-
         cont = 0
         # 图片内容
         getImgs = resp['data']['pics']
@@ -55,8 +59,8 @@ def task(specified):
 
         return otherImpl.toImage(content,'images\\图片缓存\\光遇日常任务')+imagesCQ
     except Exception as err:
-        print('错误信息：%s' % err)
-        print('------------报错0---------------')
+        log.info('错误信息：%s' % err)
+        log.error('------------报错0---------------')
         if get_weibo(uid, specified):
             return '无内容，请确定你要查询的内容是否存在'
         task(specified)
@@ -64,10 +68,9 @@ def task(specified):
 # 死循环监控
 def die():
     while (True):
-        time.sleep(60)
-        if any(time.strftime("%H:%M", time.localtime()) == str for str in ['00:03', '00:10','12:05']):
-            get_weibo(uid,'日常')
-            get_weibo(uid,'P1预估兑换树')
+        time.sleep(40)
+        if any(time.strftime("%H:%M", time.localtime()) == str for str in ['00:03', '00:10','00:15','12:05']):
+            shoudong()
 
 # 手动刷新数据
 def shoudong():
@@ -184,6 +187,7 @@ def figure(name):
         return '\n当前兑换图未被收录，已收录兑换图有:\n' + jpglist
 
 # if __name__ == '__main__':
+#     task("日常")
     # content  = re.sub(r'<[^>]+>',"",get_weibo(uid, "日常")['data']['text'],re.S)
     # print(content[:content.find("网易云游戏")])
     # print(re.compile(r'<[^>]+>', get_weibo(uid, "日常")['data']['text']))

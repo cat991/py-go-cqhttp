@@ -181,11 +181,20 @@ def auth(group_id, auth_code):
             else:
                 with open(path, 'r', encoding='utf-8')as f3:
                     auth_db = json.loads(f3.read())
-                    data = {
-                        "group_id": group_id,
-                        "time": endTime
-                    }
-                    auth_db.append(data)
+                    cont = 0
+                    fl = True
+                    for i in auth_db:
+                        if group_id == i['group_id']:
+                            auth_db[cont]['time'] = endTime
+                            fl = False
+                            break
+                        cont +=1
+                    if fl:
+                        data = {
+                            "group_id": group_id,
+                            "time": endTime
+                        }
+                        auth_db.append(data)
                     f3.close()
             with open(path, 'w', encoding='utf-8')as f2:
                 json.dump(auth_db, f2, ensure_ascii=False)
@@ -193,10 +202,20 @@ def auth(group_id, auth_code):
             with open(auth_path, 'w', encoding='utf-8')as f2:
                 json.dump(auth_json, f2, ensure_ascii=False)
                 f2.close()
-                return '群授权成功，开启萝卜功能 ,到期时间'+time.strftime("%Y年%m月%d日",time.localtime(endTime))
+                return '群授权成功，到期时间'+time.strftime("%Y年%m月%d日",time.localtime(endTime))
         else:
             return '授权失败,不存在的授权信息'
 
+# 查询群到期时间
+def get_expiration_time(group_id):
+    path = PATH + f'\\data\\config\\group\\authdb.json'
+    with open(path, 'r', encoding='utf-8')as f:
+        auth_json = json.loads(f.read())
+        f.close()
+        for i in auth_json:
+            if group_id == i['group_id']:
+                return '群授权到期时间为：' + time.strftime("%Y年%m月%d日", time.localtime(i['time']))
+    return "该群并未获取授权"
 
 # 获取授权码
 def get_auth_code(day:int):

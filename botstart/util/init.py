@@ -12,6 +12,7 @@ class CONFIG():
     give: int
     msgDelet: bool
     masterId:int
+    fengkong = False
 
 def get_config():
     # print("sys.path[0] = ", sys.path[0])
