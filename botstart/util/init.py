@@ -1,7 +1,7 @@
 import os, sys, yaml
 from gocqhttpbot import PATH
 
-class CONFIG():
+class CONFIG:
     botqq: int
     botName: str
     master: int

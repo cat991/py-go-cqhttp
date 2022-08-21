@@ -19,3 +19,4 @@ def query_one(sql:str)->dict:
 def close():
     cursor.close()
     conn.close()
+
