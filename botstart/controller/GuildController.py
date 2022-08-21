@@ -183,7 +183,7 @@ def guildController(data):
     elif '复刻' == message or '复刻先祖' == message:
         GuildEntity.send_guild_channel_msg(guild_id, channel_id, at_user + skyImpl.task('P1预估兑换树'))
     elif '每日' == message or '每日任务' == message:
-        GuildEntity.send_guild_channel_msg(guild_id, channel_id, at_user + skyImpl.task('日常'))
+        GuildEntity.send_guild_channel_msg(guild_id, channel_id, at_user + skyImpl.task(skyImpl.gettimeabbreviations()+'日常'))
     elif message == '更新缓存' and (user_id == str(init.CONFIG.masterId) or permissions.getPermissions(user_id)):
         GuildEntity.send_guild_channel_msg(guild_id, channel_id, at_user + skyImpl.shoudong())
     elif '兑换图' in message and len(message) < 8:

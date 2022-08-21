@@ -232,7 +232,7 @@ def groupController(data):
     elif '复刻' == message or '复刻先祖' == message:
         GroupEntity.send_group_msg(group_id, at_id + skyImpl.task('P1预估兑换树'),False)
     elif '每日' == message or '每日任务' == message:
-        GroupEntity.send_group_msg(group_id, at_id + skyImpl.task('日常'),False)
+        GroupEntity.send_group_msg(group_id, at_id + skyImpl.task(skyImpl.gettimeabbreviations()+'日常'),False)
     elif message == '更新缓存' and user_id == str(init.CONFIG.master):
         GroupEntity.send_group_msg(group_id, at_id + skyImpl.shoudong())
     elif '兑换图' in message and len(message) < 8:

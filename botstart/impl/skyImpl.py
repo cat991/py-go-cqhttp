@@ -74,9 +74,15 @@ def die():
 
 # 手动刷新数据
 def shoudong():
-    get_weibo(uid,'日常')
+    get_weibo(uid,gettimeabbreviations()+'日常')
     get_weibo(uid,'P1预估兑换树')
     return '数据刷新成功'
+
+def gettimeabbreviations()->str :
+    local = time.strftime("%m.%d", time.localtime())
+    left = local[:local.find(".")][1:] if local[:local.find(".")][:1] == "0" else local[:local.find(".")]
+    right = local[local.find("."):][1:] if local[local.find("."):][:1] == "0" else local[local.find("."):]
+    return left+ right
 
 #定义页面打开函数
 def use_proxy(url,proxy_addr):
