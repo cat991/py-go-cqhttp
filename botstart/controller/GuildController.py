@@ -234,7 +234,9 @@ def guildController(data):
         GuildEntity.send_guild_channel_msg(guild_id, channel_id, at_user + '赞助：https://afdian.net/@cat991')
     elif any(str in message[:1] for str in ['打', '顶']) and len(message) < 5:
         GuildEntity.send_guild_channel_msg(guild_id,channel_id,at_user+memeImgGenerate.index(message))
-
+    elif message[:4] =="羊了个羊":
+        message = message.replace(" ","")
+        GuildEntity.send_guild_channel_msg(guild_id,channel_id,at_user+yuleImpl.yang([message[4:]]))
 
 # 获取指令内容
 def pass_list(path):
