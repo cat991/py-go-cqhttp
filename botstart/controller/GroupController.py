@@ -1,10 +1,12 @@
-from gocqhttpbot.botstart.entity import GroupEntity, CQcode, xmlEntity
-from gocqhttpbot.botstart.impl import wfImpl, skyImpl, guildImpl, animeImpl, hireImpl
-import json, re, os, sys,random
+
+from gocqhttpbot.botstart.entity import GroupEntity, CQcode
+from gocqhttpbot.botstart.impl import wfImpl, skyImpl, guildImpl, animeImpl,RadishImpl,yuleImpl
+import json, re,random
 from gocqhttpbot import PATH
 # 发送群消息
-from gocqhttpbot.botstart.util import memeImgGenerate, SignUtil,permissions,init
+from gocqhttpbot.botstart.util import SignUtil,permissions,init
 from gocqhttpbot import log
+from gocqhttpbot.botstart.dao import GroupHanderDao
 
 def groupController(data):
     # print('进入群消息处理'+data)
@@ -12,6 +14,14 @@ def groupController(data):
     post_type = data['post_type']  # 消息类型
     if post_type == 'notice':
         return
+    # 种萝卜
+    RadishImpl.run(**data)
+    # 光遇
+    skyImpl.run(**data)
+    # 二次元
+    RadishImpl.erciyuan(**data)
+    # 星际战甲
+    wfImpl.run(**data)
     self_id = str(data['self_id'])  # 框架qq号
     group_id = data['group_id']  # 群号
     raw_message = data['raw_message']  # 原始消息内容
@@ -20,9 +30,6 @@ def groupController(data):
     at_id = f'[CQ:at,qq={user_id}]'
     nickname = data['sender']['nickname']
     log.info(f'收到 来自群内用户{nickname}  说  { message if len(message)<20 else message[:20] + "..."}')
-
-
-
 
     if message == "开启风控" and user_id == str(init.CONFIG.master):
         init.CONFIG.fengkong = True
@@ -43,7 +50,7 @@ def groupController(data):
         GroupEntity.send_group_msg(group_id, at_id + permissions.get_auth_code(int(message[5:])))
     elif message == '取消授权' and user_id == str(init.CONFIG.master):
         GroupEntity.send_group_msg(group_id,permissions.delAuth(group_id))
-    elif ('菜单' in message or  '功能' in message) and len(message) < 6 and not message == "授权功能":
+    elif ('菜单' in message or  '功能' in message) and len(message) < 5 and not message == "授权功能":
         if message == '光遇菜单' or message == '光遇功能':
             GroupEntity.send_group_msg(group_id, at_id + CQcode.images('images\\光遇\\菜单.JPG'))
         elif message == '战甲菜单' or message == '战甲功能':
@@ -57,47 +64,17 @@ def groupController(data):
     if permissions.get_auth(group_id) == False:
         return ""
 
-    # 二次元老婆对话
-    anime = animeImpl.anime(message)
-    if anime:
-        GroupEntity.send_group_msg(group_id, anime,False)
 
+    # 权限控制
     role = data['sender']['role']  # 获取权限 owner 或 admin 或 member
 
-  # ————————————————————————————————————种萝卜功能----------------
-    if message == '签到':
-        GroupEntity.send_group_msg(group_id, at_id + SignUtil.addUser(str(group_id), user_id))
-    elif message == '查询' or message == '我的萝卜':
-        GroupEntity.send_group_msg(group_id, at_id + SignUtil.user_ById(str(group_id), user_id))
-    elif message == '排行榜' or message == '萝卜榜':
-        GroupEntity.send_group_msg(group_id, at_id + SignUtil.queryAll_json(str(group_id)),fengkong=init.CONFIG.fengkong)
-    elif '萝卜丁抽奖' == message[:5] :
-        try:
-            mod_rank = re.findall(f'[0-9]+', message)[0]
-            GroupEntity.send_group_msg(group_id,f'中奖数字：{str(random.randint(1,int(mod_rank)))}')
-        except Exception:
-            pass
-            # GroupEntity.send_group_msg(group_id,"可能出现了一点小bug'？")
-    elif '萝卜' in message:
-        SignUtil.sig_index_group(json.dumps(data))
-    elif message[:2] == '打劫' or message[:2] == '抢劫':
+    if message == '/type' or message == "/状态":
+        GroupEntity.send_group_msg(group_id,GroupHanderDao.getAll(str(group_id)))
+    elif message[:3] == '/开启' and (role == 'owner' or role == 'admin' or user_id == str(init.CONFIG.master)):
+        GroupEntity.send_group_msg(group_id,GroupHanderDao.setType(str(group_id),message.replace(" ","")[3:],True))
+    elif message[:3] == '/关闭' and (role == 'owner' or role == 'admin' or user_id == str(init.CONFIG.master)):
+        GroupEntity.send_group_msg(group_id,GroupHanderDao.setType(str(group_id),message.replace(" ","")[3:],False))
 
-        try:
-            at_qq = re.findall('[0-9]+', message)[0]
-            GroupEntity.send_group_msg(group_id, SignUtil.rob(str(group_id), user_id, at_qq))
-            return
-        except:
-            GroupEntity.send_group_msg(group_id, at_id  + '你先艾特个人')
-    elif message[:2] == '赠送':
-        try:
-            numbers = re.findall('[0-9]+', message)[1]
-            at_qq = re.findall('[0-9]+', message)[0]
-            GroupEntity.send_group_msg(group_id,
-                                               SignUtil.give(str(group_id), user_id, at_qq, int(numbers)))
-        except:
-            GroupEntity.send_group_msg(group_id, at_id + '没写数量？')
-    elif '雇佣' in message:
-        hireImpl.hire_group(json.dumps(data))
 
 
     if message == '食莞' or message == "投喂":
@@ -128,115 +105,7 @@ def groupController(data):
         cq = animeImpl.dinggong()
         GroupEntity.send_group_msg(group_id, cq['cq'])
         GroupEntity.send_group_msg(group_id, cq['name'])
-    elif message[:2].lower() == 'rm' or message[:2].lower() == 'zk':
-        message = message[2:]
-        GroupEntity.send_group_msg(group_id, at_id + wfImpl.wfrm(message))
-    elif message[:2] == '攻略':
-        GroupEntity.send_group_msg(group_id, at_id + wfImpl.ordis(message[2:]))
-    elif message == '地球时间':
-        GroupEntity.send_group_msg(group_id, at_id + wfImpl.earthCycle())
-    elif message == '平原时间':
-        try:
-            GroupEntity.send_group_msg(group_id, at_id + wfImpl.dayTime())
-        except:
-            GroupEntity.send_group_msg(group_id, at_id + '正在进行昼夜更替，稍后查询哦')
-    elif message == '平原':
-        try:
-            GroupEntity.send_group_msg(group_id,
-                                       at_id + f'夜灵平原{wfImpl.dayTime()}  \n\n金星山谷{wfImpl.jxwd()}\n\n火卫二\n{wfImpl.hw2()}',fengkong=init.CONFIG.fengkong)
-        except:
-            GroupEntity.send_group_msg(group_id, at_id + '正在进行昼夜更替，稍后查询哦')
-    elif message == '仲裁' or message == '仲裁任务':
-        GroupEntity.send_group_msg(group_id, at_id + wfImpl.arbitration())
-    elif message[:4].lower() == 'wiki':
-        GroupEntity.send_group_msg(group_id, at_id + wfImpl.wiki(message[4:]))
 
-    # elif msg == '二次元':
-    #     botutils.groupmsg(loginqq, group, botImpl.二次元(loginqq, group))
-    elif message[:2] == '遗物':
-        # GroupEntity.send_group_msg(group_id, at_id + wfImpl.search_relics(message[2:],True))
-        GroupEntity.send_group_forward_msg(group_id, wfImpl.search_relics(message[2:], True))
-    elif '突击' in message and len(message) <= 5:
-        if message == '突击':
-            GroupEntity.send_group_msg(group_id, at_id + wfImpl.sortie(0))
-        elif message == '国服突击':
-            GroupEntity.send_group_msg(group_id, at_id + wfImpl.sortie(1))
-        elif message == '国际服突击':
-            GroupEntity.send_group_msg(group_id, at_id + wfImpl.sortie(2))
-
-    elif message == '金星温度' or message == '山谷' or message == '金星':
-        try:
-            GroupEntity.send_group_msg(group_id, at_id + wfImpl.jxwd())
-        except:
-            GroupEntity.send_group_msg(group_id, at_id + '金星的温度现在不稳定，请稍后查询哦')
-    elif message == '火卫二' or message == 'hw2':
-        try:
-            GroupEntity.send_group_msg(group_id, at_id + wfImpl.hw2())
-        except:
-            GroupEntity.send_group_msg(group_id, at_id + '当前查询出现了一点小状况，请联系作者修复')
-    # elif message == '菜单' or message == '功能':
-    #     if guildImpl.get_group_info(group_id, '光遇') or guildImpl.get_group_info(group_id, 'sky'):
-    #         GroupEntity.send_group_msg(group_id, at_id + CQcode.images('images\\光遇\\菜单.JPG'))
-    #     else:
-    #         GroupEntity.send_group_msg(group_id, at_id + wfImpl.warframe())
-
-    elif message == '疯狂星期四':
-        GroupEntity.send_group_msg(group_id, animeImpl.crazy())
-
-    elif message == '奸商' or message == '虚空商人':
-        try:
-            GroupEntity.send_group_msg(group_id, at_id + wfImpl.voidTrader())
-        except:
-            GroupEntity.send_group_msg(group_id, at_id + '当前查询出现了一点小状况，请联系作者修复')
-    # elif msg[:2] == '翻译':
-    #     botutils.groupmsg(loginqq, group, botImpl.botci(msg[2:]))
-
-    # elif msg == '查询口令':
-    #     botutils.groupmsg(loginqq, group, botImpl.queryAll_json())
-
-    elif message == '火卫二赏金':
-        GroupEntity.send_group_msg(group_id, at_id + wfImpl.allOutmsg('EntratiSyndicate'))
-    elif message == '地球赏金':
-        GroupEntity.send_group_msg(group_id, at_id + wfImpl.allOutmsg('Ostrons'))
-    elif message == '金星赏金':
-        GroupEntity.send_group_msg(group_id, at_id + wfImpl.allOutmsg('Solaris'))
-    elif message == '达尔沃' or message == '折扣':
-        GroupEntity.send_group_msg(group_id, at_id + wfImpl.dailyDeals())
-    elif message == '地球赏金':
-        GroupEntity.send_group_msg(group_id, at_id + wfImpl.allOutmsg('Ostrons'))
-    elif message == '入侵':
-        GroupEntity.send_group_msg(group_id, at_id + wfImpl.allOutmsg('invasions'))
-    elif message == '活动':
-        GroupEntity.send_group_msg(group_id, at_id + wfImpl.allOutmsg('events'))
-    elif message == '中继站轮换' or message == '泰辛':
-        GroupEntity.send_group_msg(group_id, at_id + wfImpl.steelPath())
-    elif any(str in message[:1] for str in ['打', '顶']) and len(message) < 5:
-        GroupEntity.send_group_msg(group_id, at_id + memeImgGenerate.index(message))
-    elif message[:2].lower() == 'wm':
-        mod_rank = re.findall(f'[0-9]+',message)
-        if len(mod_rank) == 0:
-            mod_rank ='0'
-        else:
-            mod_rank = mod_rank[0]
-        message = message[2:].replace(mod_rank,"").replace(" ","")
-        # mod_rank = ''
-        # if re.findall(f'[0-9]', message[2:]):
-        #     mod_ranks = re.findall(f'[0-9]', message[2:].replace(" ", ""))
-        #     for m in mod_ranks:
-        #         mod_rank = mod_rank + m
-        #     message = message[2:].replace(" ", "").replace(mod_rank, "")
-        # else:
-        #     mod_rank = '0'
-        #     message = message[2:].replace(" ", "")
-        GroupEntity.send_group_msg(group_id, at_id + wfImpl.wfwm(message, mod_rank),fengkong=init.CONFIG.fengkong)
-    elif '复刻' == message or '复刻先祖' == message:
-        GroupEntity.send_group_msg(group_id, at_id + skyImpl.task('P1预估兑换树'),False)
-    elif '每日' == message or '每日任务' == message:
-        GroupEntity.send_group_msg(group_id, at_id + skyImpl.task(skyImpl.gettimeabbreviations()+'日常'),False)
-    elif message == '更新缓存' and user_id == str(init.CONFIG.master):
-        GroupEntity.send_group_msg(group_id, at_id + skyImpl.shoudong())
-    elif '兑换图' in message and len(message) < 8:
-        GroupEntity.send_group_msg(group_id, at_id + skyImpl.figure(message.replace('兑换图', '')))
     elif message[:2] == '发单':
         if role == 'owner' or role == 'admin' or user_id == str(init.CONFIG.master):
             if GroupEntity.get_group_at_all_remain(group_id):
@@ -251,7 +120,18 @@ def groupController(data):
         GroupEntity.send_group_msg(group_id, at_id + guildImpl.delete_json(message[4:], '默认指令'))
     elif message == '查询口令':
         GroupEntity.send_group_msg(group_id, at_id + guildImpl.queryAll_json('默认指令'))
-
+    elif message[:4] =="羊了个羊":
+        try:
+            msgList=re.findall(f'[0-9]+', message)
+            id = msgList[0]
+            n = msgList[1]
+            time = msgList[2]
+            if int(n) > 10 :
+                GroupEntity.send_group_msg(group_id, at_id + "每次次数不能大于10")
+                return ""
+            GroupEntity.send_group_msg(group_id,at_id+yuleImpl.yang(id,n,time))
+        except:
+            GroupEntity.send_group_msg(group_id, at_id + "\n输入有误，格式：羊了个羊-ID-次数-时间\n示例：羊了个羊-1234-10-6\n\n也有可能是游戏蹦了")
 
 # 获取指令内容
 def pass_list(path):

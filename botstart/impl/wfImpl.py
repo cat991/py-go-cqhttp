@@ -1,10 +1,14 @@
 import json, time, re
 import requests
-from gocqhttpbot.botstart.impl import otherImpl
+
+from gocqhttpbot.botstart.dao.GroupHanderDao import switch
+from gocqhttpbot.botstart.impl import otherImpl, animeImpl
 from gocqhttpbot.botstart.entity import GroupEntity
 
 from gocqhttpbot import PATH
 import os, sys
+
+from gocqhttpbot.botstart.util import memeImgGenerate, init
 
 headers = {
     "User-Agent": "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.190 Safari/537.36"}
@@ -389,7 +393,8 @@ def caidan():
 ----当前菜单----
 光遇菜单 | 战甲菜单
 授权功能 | 赞助作者
-购买授权联系：q2996964572
+/状态   |  /type
+
     """
 
 def warframe():
@@ -435,3 +440,85 @@ def strategy(txt):
     return content
 
     # path = PATH + "\\WF_Sale.json"
+@switch('星际战甲')
+def run(data):
+    group_id = data['group_id']  # 群号
+    message = data['message']  # 消息内容
+    user_id = str(data['user_id'])  # 触发用户id
+    at_id = f'[CQ:at,qq={user_id}]'
+    if message[:2].lower() == 'rm' or message[:2].lower() == 'zk':
+        message = message[2:]
+        GroupEntity.send_group_msg(group_id, at_id + wfrm(message))
+    elif message[:2] == '攻略':
+        GroupEntity.send_group_msg(group_id, at_id + ordis(message[2:]))
+    elif message == '地球时间':
+        GroupEntity.send_group_msg(group_id, at_id + earthCycle())
+    elif message == '平原时间':
+        try:
+            GroupEntity.send_group_msg(group_id, at_id + dayTime())
+        except:
+            GroupEntity.send_group_msg(group_id, at_id + '正在进行昼夜更替，稍后查询哦')
+    elif message == '平原':
+        try:
+            GroupEntity.send_group_msg(group_id,
+                                       at_id + f'夜灵平原{dayTime()}  \n\n金星山谷{jxwd()}\n\n火卫二\n{hw2()}',
+                                       fengkong=init.CONFIG.fengkong)
+        except:
+            GroupEntity.send_group_msg(group_id, at_id + '正在进行昼夜更替，稍后查询哦')
+    elif message == '仲裁' or message == '仲裁任务':
+        GroupEntity.send_group_msg(group_id, at_id + arbitration())
+    elif message[:4].lower() == 'wiki':
+        GroupEntity.send_group_msg(group_id, at_id + wiki(message[4:]))
+    elif message[:2] == '遗物':
+        GroupEntity.send_group_forward_msg(group_id, search_relics(message[2:], True))
+    elif '突击' in message and len(message) <= 5:
+        if message == '突击':
+            GroupEntity.send_group_msg(group_id, at_id + sortie(0))
+        elif message == '国服突击':
+            GroupEntity.send_group_msg(group_id, at_id + sortie(1))
+        elif message == '国际服突击':
+            GroupEntity.send_group_msg(group_id, at_id + sortie(2))
+    elif message == '金星温度' or message == '山谷' or message == '金星':
+        try:
+            GroupEntity.send_group_msg(group_id, at_id + jxwd())
+        except:
+            GroupEntity.send_group_msg(group_id, at_id + '金星的温度现在不稳定，请稍后查询哦')
+    elif message == '火卫二' or message == 'hw2':
+        try:
+            GroupEntity.send_group_msg(group_id, at_id + hw2())
+        except:
+            GroupEntity.send_group_msg(group_id, at_id + '当前查询出现了一点小状况，请联系作者修复')
+    elif message == '疯狂星期四':
+        GroupEntity.send_group_msg(group_id, animeImpl.crazy())
+    
+    elif message == '奸商' or message == '虚空商人':
+        try:
+            GroupEntity.send_group_msg(group_id, at_id + voidTrader())
+        except:
+            GroupEntity.send_group_msg(group_id, at_id + '当前查询出现了一点小状况，请联系作者修复')
+    elif message == '火卫二赏金':
+        GroupEntity.send_group_msg(group_id, at_id + allOutmsg('EntratiSyndicate'))
+    elif message == '地球赏金':
+        GroupEntity.send_group_msg(group_id, at_id + allOutmsg('Ostrons'))
+    elif message == '金星赏金':
+        GroupEntity.send_group_msg(group_id, at_id + allOutmsg('Solaris'))
+    elif message == '达尔沃' or message == '折扣':
+        GroupEntity.send_group_msg(group_id, at_id + dailyDeals())
+    elif message == '地球赏金':
+        GroupEntity.send_group_msg(group_id, at_id + allOutmsg('Ostrons'))
+    elif message == '入侵':
+        GroupEntity.send_group_msg(group_id, at_id + allOutmsg('invasions'))
+    elif message == '活动':
+        GroupEntity.send_group_msg(group_id, at_id + allOutmsg('events'))
+    elif message == '中继站轮换' or message == '泰辛':
+        GroupEntity.send_group_msg(group_id, at_id + steelPath())
+    elif any(str in message[:1] for str in ['打', '顶']) and len(message) < 5:
+        GroupEntity.send_group_msg(group_id, at_id + memeImgGenerate.index(message))
+    elif message[:2].lower() == 'wm':
+        mod_rank = re.findall(f'[0-9]+', message)
+        if len(mod_rank) == 0:
+            mod_rank = '0'
+        else:
+            mod_rank = mod_rank[0]
+        message = message[2:].replace(mod_rank, "").replace(" ", "")
+        GroupEntity.send_group_msg(group_id, at_id + wfwm(message, mod_rank), fengkong=init.CONFIG.fengkong)

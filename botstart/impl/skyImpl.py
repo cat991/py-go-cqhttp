@@ -1,10 +1,13 @@
-import requests,re
+import requests
+
+from gocqhttpbot.botstart.dao.GroupHanderDao import switch
 from gocqhttpbot.botstart.entity import CQcode
 from gocqhttpbot.botstart.impl import otherImpl
 import urllib.request
 import json,os,sys,time
 from gocqhttpbot import PATH,log
-
+from io import BytesIO
+from PIL import Image
 #定义要爬取的微博大V的微博ID
 uid='7360748659'
 
@@ -12,7 +15,7 @@ uid='7360748659'
 proxy_addr="122.241.72.191:808"
 
 #每日任务
-def task(specified):
+def task(specified,test=False):
     imagesCQ = ''
     botpath = PATH + f'\\频道数据\\光遇缓存数据\\{specified}.json'
     # botpath = f'E:\pythonProject\\test1\频道数据\光遇缓存数据\日常.json'
@@ -27,37 +30,28 @@ def task(specified):
             # print(resp)
         content = resp['data']['text'].replace("<br />", '\n')
         content = re.sub(r'<[^>]+>', "", content, re.S)
-        # content = re.sub(r'<[^>]+>',"",resp['data']['text'],re.S)
-        # content = content.replace("<br />",'\n')
-        content = content[content.find("======"):content.find("网易云游戏")]
 
-        # content = re.findall('</span></a>(.*?)<a href=', resp['data']['text'])[0]
-        #
-        # content = content.replace('<br />', '\n')
-        # if '<a' in content:
-        #     ls1 = re.findall('<a(.*?)>', content)
-        #     for i in ls1:
-        #         content = content.replace(i, '').replace('<a>', '').replace('</a>', '')
-        #
-        # if '<img' in content:
-        #     ls2 = re.findall('<img(.*?)>', content)
-        #     for i in ls2:
-        #         content = content.replace(i, '').replace('<img>', '')
-        #
-        # if '<span' in content:
-        #     ls3 = re.findall('<span(.*?)>', content)
-        #     for i in ls3:
-        #         content = content.replace(i, '').replace('<span>', '').replace('</span>', '')
+        content = content[content.find("======"):content.find("网易云游戏")]
+        testIm = otherImpl.toImage(content, 'images\\图片缓存\\光遇日常任务')
         cont = 0
         # 图片内容
         getImgs = resp['data']['pics']
+        listImUrl = []
         # print(getImgs)
         for i in getImgs:
             if cont < 4 :
                 imagesCQ += CQcode.images(i['large']['url'])
+                listImUrl.append(i['large']['url'])
             cont += 1
-
-        return otherImpl.toImage(content,'images\\图片缓存\\光遇日常任务')+imagesCQ
+        if test:
+            if os.path.exists(PATH+f"/频道数据/光遇缓存数据/{specified}.jpg"):
+                imagesCQ = CQcode.images(f"/频道数据/光遇缓存数据/{specified}.jpg")
+            else:
+                allImgToOne(specified)
+                imagesCQ = CQcode.images(f"/频道数据/光遇缓存数据/{specified}.jpg")
+            return imagesCQ
+        else:
+            return otherImpl.toImage(content, 'images\\图片缓存\\光遇日常任务') + imagesCQ
     except Exception as err:
         log.info('错误信息：%s' % err)
         log.error('------------报错0---------------')
@@ -71,6 +65,63 @@ def die():
         time.sleep(40)
         if any(time.strftime("%H:%M", time.localtime()) == str for str in ['00:03', '00:10','00:15','12:05']):
             shoudong()
+            allImgToOne(gettimeabbreviations()+'日常')
+# 合成一张图
+def allImgToOne(specified):
+    imagesCQ = ''
+    botpath = PATH + f'\\频道数据\\光遇缓存数据\\{specified}.json'
+    # botpath = f'E:\pythonProject\\test1\频道数据\光遇缓存数据\日常.json'
+    # resp = requests.get('https://m.weibo.cn/statuses/show?id=' + get_weibo(uid)).text
+    resp = ''
+    try:
+        with open(botpath,'r',encoding='utf-8')as f:
+            # resp = f.read()
+
+            resp = json.loads(f.read())
+            f.close()
+            # print(resp)
+        content = resp['data']['text'].replace("<br />", '\n')
+        content = re.sub(r'<[^>]+>', "", content, re.S)
+
+        content = content[content.find("======"):content.find("网易云游戏")]
+        testIm = otherImpl.toImage(content, 'images\\图片缓存\\光遇日常任务')
+        cont = 0
+        # 图片内容
+        getImgs = resp['data']['pics']
+        listImUrl = []
+        # print(getImgs)
+        for i in getImgs:
+            if cont < 4 :
+                imagesCQ += CQcode.images(i['large']['url'])
+                listImUrl.append(i['large']['url'])
+            cont += 1
+
+        listIm =[]
+        testIm = Image.open(PATH+"\\images\\图片缓存\\光遇日常任务.png")
+        width,height = testIm.size
+        CH = height
+        for jj in listImUrl:
+            listIm.append(BytesIO(requests.get(jj).content))
+        for jj in listIm:
+            x, y = Image.open(jj).size
+            if width < x:
+                width = x
+            height += y
+        newImg = Image.new(mode="RGB", size=(width, height), color="#FFF")
+        newImg.paste(testIm, (0, CH))
+        # newImg.show()
+        for jj in listIm:
+            img = Image.open(jj)
+            newImg.paste(img, (0, CH))
+            # newImg.show()
+            x, y = img.size
+            CH += y
+        # newImg.show()
+        newImg.save(PATH+f"/频道数据/光遇缓存数据/{specified}.jpg")
+
+    except Exception as a:
+        log.info('错误信息：%s' % a)
+
 
 # 手动刷新数据
 def shoudong():
@@ -79,11 +130,11 @@ def shoudong():
     return '数据刷新成功'
 
 def gettimeabbreviations()->str :
-    local = time.strftime("%m.%d", time.localtime())
-    left = local[:local.find(".")][1:] if local[:local.find(".")][:1] == "0" else local[:local.find(".")]
-    right = local[local.find("."):][1:] if local[local.find("."):][:1] == "0" else local[local.find("."):]
-    return left+ right
-
+    MM = time.strftime("%m", time.localtime())
+    dd = time.strftime("%d", time.localtime())
+    # print(MM[1:] if MM[:1] == "0" else MM)
+    # print(dd[1:] if dd[:1] == "0" else dd)
+    return f'{MM[1:] if MM[:1] == "0" else MM}.{dd[1:] if dd[:1] == "0" else dd}'
 #定义页面打开函数
 def use_proxy(url,proxy_addr):
     req=urllib.request.Request(url)
@@ -197,3 +248,26 @@ def figure(name):
     # content  = re.sub(r'<[^>]+>',"",get_weibo(uid, "日常")['data']['text'],re.S)
     # print(content[:content.find("网易云游戏")])
     # print(re.compile(r'<[^>]+>', get_weibo(uid, "日常")['data']['text']))
+from gocqhttpbot.botstart.entity import GroupEntity
+import json, re
+# 发送群消息
+from gocqhttpbot.botstart.util import init
+@switch("光遇")
+def run(data):
+    print("进入光遇")
+    # data = json.loads(data)
+    post_type = data['post_type']  # 消息类型
+    if post_type == 'notice':
+        return
+    group_id = data['group_id']  # 群号
+    message = data['message']  # 消息内容
+    user_id = str(data['user_id'])  # 触发用户id
+    at_id = f'[CQ:at,qq={user_id}]'
+    if '复刻' == message or '复刻先祖' == message:
+        GroupEntity.send_group_msg(group_id, at_id + task('P1预估兑换树'), False)
+    elif '每日' == message or '每日任务' == message:
+        GroupEntity.send_group_msg(group_id, at_id + task(gettimeabbreviations() + '日常',init.CONFIG.fengkong), False)
+    elif message == '更新缓存' and user_id == str(init.CONFIG.master):
+        GroupEntity.send_group_msg(group_id, at_id + shoudong())
+    elif '兑换图' in message and len(message) < 8:
+        GroupEntity.send_group_msg(group_id, at_id + figure(message.replace('兑换图', '')))
