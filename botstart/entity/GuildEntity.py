@@ -14,7 +14,7 @@ def send_guild_channel_msg(guild_id, channel_id, message):
     data = {
         "guild_id": guild_id,
         "channel_id": channel_id,
-        "message": message+ ('\n机器人是免费的,如果你喜欢的话可以点击链接赞助作者哦~\n地址:https://dun.mianbaoduo.com/@heimao' if random.randint(1,10) == 5  else ''),
+        "message": message+ ('\n赞 ' if random.randint(1,10) == 5  else ''),
     }
     requests.post(url, data)
     # permissions.add_msg_id(requests.post(url, data).text)

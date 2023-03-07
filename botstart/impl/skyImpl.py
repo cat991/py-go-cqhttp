@@ -31,7 +31,7 @@ def task(specified,test=False):
         content = resp['data']['text'].replace("<br />", '\n')
         content = re.sub(r'<[^>]+>', "", content, re.S)
 
-        content = content[content.find("======"):content.find("网易云游戏")]
+        content = content[content.find("=『每日任务』="):content.find("网易云游戏")]
         testIm = otherImpl.toImage(content, 'images\\图片缓存\\光遇日常任务')
         cont = 0
         # 图片内容

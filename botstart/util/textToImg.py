@@ -13,6 +13,7 @@ def toImage(imageFile,x,y,text,pathName,size):
     draw = ImageDraw.Draw(im1)
     draw.text(xy=(x, y), text=text, font=font,fill=(1, 0, 0))
 
+
     im1.save(pathName)
 
 '''

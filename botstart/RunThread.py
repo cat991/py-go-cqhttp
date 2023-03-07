@@ -8,6 +8,7 @@ import json, os, time
 from concurrent.futures import ThreadPoolExecutor
 
 executor = ThreadPoolExecutor(5)
+
 import threading
 
 app = Flask(__name__)
@@ -86,7 +87,6 @@ class runexe(threading.Thread):  # 继承父类threading.Thread
             # print()
         except Exception as result:
             print('核心文件运行失败%s' % result)
-
 
 class runhire(threading.Thread):  # 继承父类threading.Thread
     def __init__(self, ):

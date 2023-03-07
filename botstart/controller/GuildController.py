@@ -57,7 +57,7 @@ def guildController(data):
         #这是战甲攻略
         strategy = wfImpl.strategy(message)
         if strategy:
-            GuildEntity.send_guild_channel_msg(guild_id, channel_id, at_user + strategy + ('如攻略有问题，请联系管理 何患' if random.randint(1,6) == 5  else '') )
+            GuildEntity.send_guild_channel_msg(guild_id, channel_id, at_user + strategy + ('' if random.randint(1,6) == 5  else '') )
 
     #这是口令内容
     for j in pass_list(pass_path):

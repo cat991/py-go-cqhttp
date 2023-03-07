@@ -64,3 +64,4 @@ def toImage(txt,path):
     image.save(os.path.dirname(os.path.realpath(sys.argv[0]))+'\\'+path+'.png', 'PNG')  # 保存在当前路径下，格式为PNG
     image.close()
     return CQcode.images(path+'.png')
+
